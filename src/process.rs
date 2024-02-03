@@ -1,41 +1,65 @@
+use std::rc::Rc;
+use std::sync::mpsc::{Receiver, Sender};
+use std::sync::{Arc, Mutex};
+use std::thread;
+
 use chrono::{DateTime, Duration, Utc};
 
 #[derive(Debug)]
 pub struct Process {
-    id: u8,
-    command: String,
-    started_at: DateTime<Utc>,
-    pid: u32,
-    status: String,
-    cpu_usage: f32,
-    memory_usage: u64,
-    user: String
+    pub id: u8,
+    pub command: String,
+    pub started_at: DateTime<Utc>,
+    pub pid: u32,
+    pub status: String,
+    pub cpu_usage: f32,
+    pub memory_usage: u64,
+    pub user: String
+}
+
+pub struct Channel {
+    pub sender: Sender<Process>,
+    pub receiver: Arc<Mutex<Receiver<Process>>>,
 }
 
 pub struct ProcessManager {
+    pub process_channel: Channel,
     pub processes: Vec<Process>
 }
 
 impl ProcessManager {
-    fn add(&mut self, process: Process) {
+    pub fn add(&mut self, process: Process) {
         self.processes.push(process);
+    }
+
+    pub fn process_listen(&mut self) {
+        let rc_receiver = Arc::clone(&self.process_channel.receiver);
+        let listener = thread::spawn(move || {
+            let receiver = rc_receiver.lock().unwrap();
+            loop {
+                let received = &receiver;
+                println!("{:?}", received);
+                
+            }
+        });
+        listener.join().unwrap();
     }
 }
 
-pub fn test_processes() {
-    let mut process_manager = ProcessManager {
-        processes: Vec::new()
-    };
-    let new_process = Process {
-        id: 0,
-        command: "npm start".to_string(),
-        started_at: Utc::now(),
-        pid: 3000,
-        status: "Running".to_string(),
-        cpu_usage: 3.02,
-        memory_usage: 1000,
-        user: "root".to_string()
-    };
-    process_manager.add(new_process);
-    println!("{:?}", process_manager.processes);
-}
+// pub fn test_processes() {
+//     let mut process_manager = ProcessManager {
+//         processes: Vec::new()
+//     };
+//     let new_process = Process {
+//         id: 0,
+//         command: "npm start".to_string(),
+//         started_at: Utc::now(),
+//         pid: 3000,
+//         status: "Running".to_string(),
+//         cpu_usage: 3.02,
+//         memory_usage: 1000,
+//         user: "root".to_string()
+//     };
+//     process_manager.add(new_process);
+//     println!("{:?}", process_manager.processes);
+// }
