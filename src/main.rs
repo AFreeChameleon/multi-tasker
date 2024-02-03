@@ -1,26 +1,12 @@
-use std::env::args;
+use std::env::{Args, args};
 
-mod start;
+mod commands;
 mod process;
 
-struct Args {
-    mode: String
-}
-
-struct Process {
-    id: u8,
-    command: String,
-    started_at: String
-}
-
 fn main() {
-    let mode = args().nth(1).expect("No mode given.");
-    let args = Args {
-        mode
+    let process_manager = process::ProcessManager {
+        processes: Vec::new()
     };
-    match args.mode.as_str() {
-        "start" => println!("Started"),
-        _ => println!("Nuffin here")
-    };
+    commands::run(&process_manager);
     process::test_processes();
 }

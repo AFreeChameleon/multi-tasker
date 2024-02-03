@@ -1,7 +1,7 @@
 use chrono::{DateTime, Duration, Utc};
 
 #[derive(Debug)]
-struct Process {
+pub struct Process {
     id: u8,
     command: String,
     started_at: DateTime<Utc>,
@@ -12,8 +12,8 @@ struct Process {
     user: String
 }
 
-struct ProcessManager {
-    processes: Vec<Process>
+pub struct ProcessManager {
+    pub processes: Vec<Process>
 }
 
 impl ProcessManager {
