@@ -1,30 +1,26 @@
-use clap::{Parser, Subcommand};
+use std::env::args;
 
-#[derive(Parser)]
-#[command(author, version, about, long_about = None)]
+mod start;
+mod process;
+
 struct Args {
-    #[command(subcommand)]
-    command: Option<Commands>
+    mode: String
 }
 
-#[derive(Subcommand)]
-enum Commands {
-    Start {
-        list: bool
-    }
+struct Process {
+    id: u8,
+    command: String,
+    started_at: String
 }
 
 fn main() {
-    let args: Args = Args::parse();
-    match &args.command {
-        Some(Commands::Start { list }) => {
-            if *list {
-                println!("Print test");
-            } else {
-                println!("not printing");
-            }
-        },
-        None => {}
-    }
-    println!("Hello, world!");
+    let mode = args().nth(1).expect("No mode given.");
+    let args = Args {
+        mode
+    };
+    match args.mode.as_str() {
+        "start" => println!("Started"),
+        _ => println!("Nuffin here")
+    };
+    process::test_processes();
 }
