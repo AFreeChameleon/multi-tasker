@@ -1,6 +1,6 @@
 use std::fs::OpenOptions;
 use std::process::{Command, Stdio, ChildStdout};
-use std::io::{BufRead, BufReader, Error, ErrorKind};
+use std::io::{BufRead, BufReader, Error, ErrorKind, Write, stdout, stderr};
 use std::sync::{mpsc::Sender, Arc};
 use std::thread;
 use chrono::{DateTime, Duration, Utc};
@@ -10,6 +10,7 @@ use crate::process::{Process, Channel};
 pub fn run(command_ref: &String, sender: Sender<Process>, processes: Vec<Process>) {
     let command = command_ref.clone();
     println!("{}", command);
+
     thread::spawn(move || {
         let mut log_file = OpenOptions::new()
             .create(true)
@@ -17,18 +18,16 @@ pub fn run(command_ref: &String, sender: Sender<Process>, processes: Vec<Process
             .append(true)
             .open("logs.log")
             .unwrap();
-        println!("threaddd");
         let stdout = Command::new("cmd")
-            .arg("/C")
-            .arg(&command)
+            .args(&["/C", "dir"])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
-            .spawn().expect("Unable to start command.")
+            .spawn()
+            .expect("The spawn messed up")
             .stdout
-            .ok_or_else(|| Error::new(
-                ErrorKind::Other, "Could not capture standard output."
-             )).expect("An error occurred.");
-        println!("RAHH");
+            .ok_or_else(|| Error::new(ErrorKind::Other,"Could not capture standard output.")).expect("FAIL");
+        println!("threaddd hmmmm");
+        println!("gruh");
         let last_process = processes.last();
         let id = match last_process {
             Some(..) => last_process.unwrap().id + 1,
@@ -44,15 +43,16 @@ pub fn run(command_ref: &String, sender: Sender<Process>, processes: Vec<Process
             memory_usage: 1000,
             user: "root".to_string()
         };
-        println!("{:?}", process);
         sender.send(process).expect("Error sending process.");
-        let reader = BufReader::new(stdout);
+        let reader: BufReader<ChildStdout> = BufReader::new(stdout);
         reader
             .lines()
             .filter_map(|line: Result<String, Error>| line.ok())
             .for_each(|line: String| {
-                println!("line: {}", line);        
+                println!("{}", line);
+                if let Err(e) = writeln!(log_file, "{}", line) {
+                    eprintln!("Couldn't write to file: {}", e);
+                }
             });
     });
-
 }

@@ -1,4 +1,4 @@
-use std::sync::{Mutex, mpsc, Arc};
+use std::{sync::{Mutex, mpsc, Arc}, thread, time::Duration};
 
 mod commands;
 mod process;
@@ -17,4 +17,5 @@ fn main() {
         &process_manager.processes   
     );
     process_manager.process_listen();
+    thread::sleep(Duration::from_secs(5));
 }

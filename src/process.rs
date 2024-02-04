@@ -42,7 +42,7 @@ impl ProcessManager {
                     .unwrap()
                     .recv()
                     .expect("Couldn't receive message.");
-                println!("{:?}", process);
+                println!("Process created: {:?}", process);
                 self.add(process);
             }
         });
