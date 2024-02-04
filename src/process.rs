@@ -19,7 +19,8 @@ pub struct Process {
 #[derive(Debug, Clone)]
 pub struct Log {
     pub process_id: u8,
-    pub content: String
+    pub content: String,
+    pub error: bool
 }
 
 pub struct Channel<T> {
