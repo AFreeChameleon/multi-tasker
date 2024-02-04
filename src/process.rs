@@ -1,11 +1,10 @@
-use std::rc::Rc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
 use chrono::{DateTime, Duration, Utc};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Process {
     pub id: u8,
     pub command: String,
@@ -24,25 +23,29 @@ pub struct Channel {
 
 pub struct ProcessManager {
     pub process_channel: Channel,
-    pub processes: Vec<Process>
+    pub processes: Arc<Vec<Process>>
 }
 
 impl ProcessManager {
     pub fn add(&mut self, process: Process) {
-        self.processes.push(process);
+        let mut processes = Arc::clone(&self.processes).to_vec();
+        processes.push(process);
+        self.processes = Arc::new(processes);
     }
 
-    pub fn process_listen(&mut self) {
+    pub fn process_listen(mut self) {
         let rc_receiver = Arc::clone(&self.process_channel.receiver);
-        let listener = thread::spawn(move || {
-            let receiver = rc_receiver.lock().unwrap();
+        thread::spawn(move || {
             loop {
-                let received = &receiver;
-                println!("{:?}", received);
-                
+                let process = rc_receiver
+                    .lock()
+                    .unwrap()
+                    .recv()
+                    .expect("Couldn't receive message.");
+                println!("{:?}", process);
+                self.add(process);
             }
         });
-        listener.join().unwrap();
     }
 }
 

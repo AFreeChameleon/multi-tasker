@@ -1,15 +1,14 @@
-use std::{env::{args}, sync::mpsc::Sender};
+use std::{env::{args}, sync::{mpsc::Sender, Arc}};
 
 use crate::process::{Channel, Process, ProcessManager};
 #[path = "commands/start.rs"] mod start;
 
 
-pub fn run(sender: Sender<Process>) {
+pub fn run(sender: Sender<Process>, processes: &Arc<Vec<Process>>) {
     let mode = args().nth(1).expect("No mode given.");
     let command = args().nth(2).expect("No command given.");
-    // let process_channel = manager.process_channel.clone();
     match mode.as_str() {
-        "start" => start::run(&command, sender),
+        "start" => start::run(&command, sender, Arc::clone(processes).to_vec()),
         _ => println!("Nuffin here")
     };
 

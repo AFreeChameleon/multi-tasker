@@ -10,8 +10,11 @@ fn main() {
             sender: process_tx,
             receiver: Arc::new(Mutex::new(process_rx)),
         },
-        processes: Vec::new()
+        processes: Arc::new(Vec::new())
     };
-    commands::run(process_manager.process_channel.sender.clone());
+    commands::run(
+        process_manager.process_channel.sender.clone(),
+        &process_manager.processes   
+    );
     process_manager.process_listen();
 }
