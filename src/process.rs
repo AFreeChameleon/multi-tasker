@@ -16,38 +16,72 @@ pub struct Process {
     pub user: String
 }
 
-pub struct Channel {
-    pub sender: Sender<Process>,
-    pub receiver: Arc<Mutex<Receiver<Process>>>,
+#[derive(Debug, Clone)]
+pub struct Log {
+    pub process_id: u8,
+    pub content: String
+}
+
+pub struct Channel<T> {
+    pub sender: Sender<T>,
+    pub receiver: Arc<Mutex<Receiver<T>>>,
 }
 
 pub struct ProcessManager {
-    pub process_channel: Channel,
-    pub processes: Arc<Vec<Process>>
+    pub process_channel: Channel<Process>,
+    pub processes: Arc<Vec<Process>>,
+}
+
+pub struct LogManager {
+    pub log_channel: Channel<Log>,
+    pub logs: Arc<Vec<Log>>
+}
+
+impl LogManager {
+    pub fn log_add(&mut self, log: Log) {
+        let mut logs = Arc::clone(&self.logs).to_vec();
+        logs.push(log);
+        self.logs = Arc::new(logs);
+    }
+
+    pub fn log_listen(mut self) {
+        let rc_receiver = Arc::clone(&self.log_channel.receiver);
+        thread::spawn(move || {
+            loop {
+                let log = rc_receiver
+                    .lock()
+                    .unwrap()
+                    .recv()
+                    .expect("Couldn't receive log.");
+                println!("Log created: {:?}", log);
+                self.log_add(log);
+            }
+        });
+    }
 }
 
 impl ProcessManager {
-    pub fn add(&mut self, process: Process) {
+    pub fn process_add(&mut self, process: Process) {
         let mut processes = Arc::clone(&self.processes).to_vec();
         processes.push(process);
         self.processes = Arc::new(processes);
     }
 
-    pub fn process_listen(mut self) {
+    pub fn process_listen(&mut self) {
         let rc_receiver = Arc::clone(&self.process_channel.receiver);
-        thread::spawn(move || {
-            loop {
-                let process = rc_receiver
-                    .lock()
-                    .unwrap()
-                    .recv()
-                    .expect("Couldn't receive message.");
-                println!("Process created: {:?}", process);
-                self.add(process);
-            }
-        });
+        loop {
+            let process = rc_receiver
+                .lock()
+                .unwrap()
+                .recv()
+                .expect("Couldn't receive message.");
+            println!("Process created: {:?}", process);
+            self.process_add(process);
+        }
     }
 }
+
+
 
 // pub fn test_processes() {
 //     let mut process_manager = ProcessManager {

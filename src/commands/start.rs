@@ -5,11 +5,15 @@ use std::sync::{mpsc::Sender, Arc};
 use std::thread;
 use chrono::{DateTime, Duration, Utc};
 
-use crate::process::{Process, Channel};
+use crate::process::{Channel, Log, Process};
 
-pub fn run(command_ref: &String, sender: Sender<Process>, processes: Vec<Process>) {
+pub fn run(
+    command_ref: &String,
+    process_sender: Sender<Process>,
+    log_sender: Sender<Log>,
+    processes: Vec<Process>
+) {
     let command = command_ref.clone();
-    println!("{}", command);
 
     thread::spawn(move || {
         let mut log_file = OpenOptions::new()
@@ -19,13 +23,18 @@ pub fn run(command_ref: &String, sender: Sender<Process>, processes: Vec<Process
             .open("logs.log")
             .unwrap();
         let stdout = Command::new("cmd")
-            .args(&["/C", "dir"])
+            .args(&["/C", &command])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
             .expect("The spawn messed up")
             .stdout
-            .ok_or_else(|| Error::new(ErrorKind::Other,"Could not capture standard output.")).expect("FAIL");
+            .ok_or_else(|| 
+                Error::new(
+                    ErrorKind::Other,
+                    "Could not capture standard output."
+                )
+            ).expect("FAIL");
         println!("threaddd hmmmm");
         println!("gruh");
         let last_process = processes.last();
@@ -43,13 +52,18 @@ pub fn run(command_ref: &String, sender: Sender<Process>, processes: Vec<Process
             memory_usage: 1000,
             user: "root".to_string()
         };
-        sender.send(process).expect("Error sending process.");
+        process_sender.send(process).expect("Error sending process.");
         let reader: BufReader<ChildStdout> = BufReader::new(stdout);
         reader
             .lines()
             .filter_map(|line: Result<String, Error>| line.ok())
             .for_each(|line: String| {
                 println!("{}", line);
+                let log = Log {
+                   process_id: id,
+                   content: line.clone()
+                };
+                log_sender.send(log).expect("Error sending log.");
                 if let Err(e) = writeln!(log_file, "{}", line) {
                     eprintln!("Couldn't write to file: {}", e);
                 }
