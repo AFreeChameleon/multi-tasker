@@ -1,11 +1,11 @@
 use std::{env::{args}, sync::{mpsc::Sender, Arc}};
 
-use crate::process::{Channel, Log, Process, ProcessManager};
+use crate::process::{Channel, Log, Process, ProcessCommand, ProcessManager};
 #[path = "commands/start.rs"] mod start;
 
 
 pub fn run(
-    process_sender: Sender<Process>,
+    process_sender: Sender<ProcessCommand>,
     log_sender: Sender<Log>,
     processes: &Arc<Vec<Process>>
 ) {

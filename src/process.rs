@@ -16,6 +16,11 @@ pub struct Process {
     pub user: String
 }
 
+pub struct ProcessCommand {
+    pub command: String,
+    pub process: Process
+}
+
 #[derive(Debug, Clone)]
 pub struct Log {
     pub process_id: u8,
@@ -29,24 +34,24 @@ pub struct Channel<T> {
 }
 
 pub struct ProcessManager {
-    pub process_channel: Channel<Process>,
+    pub channel: Channel<ProcessCommand>,
     pub processes: Arc<Vec<Process>>,
 }
 
 pub struct LogManager {
-    pub log_channel: Channel<Log>,
+    pub channel: Channel<Log>,
     pub logs: Arc<Vec<Log>>
 }
 
 impl LogManager {
-    pub fn log_add(&mut self, log: Log) {
+    pub fn add(&mut self, log: Log) {
         let mut logs = Arc::clone(&self.logs).to_vec();
         logs.push(log);
         self.logs = Arc::new(logs);
     }
 
-    pub fn log_listen(mut self) {
-        let rc_receiver = Arc::clone(&self.log_channel.receiver);
+    pub fn listen(mut self) {
+        let rc_receiver = Arc::clone(&self.channel.receiver);
         thread::spawn(move || {
             loop {
                 let log = rc_receiver
@@ -55,30 +60,48 @@ impl LogManager {
                     .recv()
                     .expect("Couldn't receive log.");
                 println!("Log created: {:?}", log);
-                self.log_add(log);
+                self.add(log);
             }
         });
     }
 }
 
 impl ProcessManager {
-    pub fn process_add(&mut self, process: Process) {
+    pub fn add(&mut self, process: Process) {
         let mut processes = Arc::clone(&self.processes).to_vec();
         processes.push(process);
         self.processes = Arc::new(processes);
     }
 
-    pub fn process_listen(&mut self) {
-        let rc_receiver = Arc::clone(&self.process_channel.receiver);
-        loop {
-            let process = rc_receiver
-                .lock()
-                .unwrap()
-                .recv()
-                .expect("Couldn't receive message.");
-            println!("Process created: {:?}", process);
-            self.process_add(process);
+    pub fn remove(&mut self, process: Process) {
+        let mut processes = Arc::clone(&self.processes)
+            .to_vec();
+        let mut filtered_processes = Vec::new();
+        for p in processes {
+            if p.id != process.id {
+                filtered_processes.push(p);
+            }
         }
+        self.processes = Arc::new(filtered_processes);
+    }
+
+    pub fn listen(mut self) {
+        let rc_receiver = Arc::clone(&self.channel.receiver);
+        thread::spawn(move || {
+            loop {
+                let received = rc_receiver
+                    .lock()
+                    .unwrap()
+                    .recv()
+                    .expect("Couldn't receive message.");
+                println!("Process: {:?}", received.process);
+                match received.command.as_str() {
+                    "add" => self.add(received.process),
+                    "remove" => self.remove(received.process),
+                    _ => ()
+                };
+            }
+        });
     }
 }
 
