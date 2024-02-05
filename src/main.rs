@@ -1,3 +1,4 @@
+#![allow(warnings)]
 use std::{sync::{Mutex, mpsc, Arc}, fs::File, thread, time::Duration};
 use tokio::{io, net::UnixListener};
 use daemonize::Daemonize;

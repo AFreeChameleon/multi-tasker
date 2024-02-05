@@ -1,4 +1,4 @@
-use std::fs::OpenOptions;
+use std::fs::{self, OpenOptions};
 use std::process::{Command, Stdio, ChildStdout, ChildStderr};
 use std::io::{BufRead, BufReader, Error, ErrorKind, Write, stdout, stderr};
 use std::sync::{mpsc::Sender, Arc};
@@ -54,12 +54,13 @@ pub fn run(
             status: "Running".to_string(),
             cpu_usage: 3.02,
             memory_usage: 1000,
-            user: "root".to_string()
+            user: "root".to_string(),
         };
         process_sender.send(ProcessCommand {
             command: "add".to_string(),
             process: process.clone()
         }).expect("Error sending process.");
+        fs::create_dir_all(format!("/tmp/main/{}/", child.id()));
         let mut stdout_file = OpenOptions::new()
             .create(true)
             .write(true)
@@ -78,13 +79,13 @@ pub fn run(
             .filter_map(|line: Result<String, Error>| line.ok())
             .for_each(|line: String| {
                 println!("{}", line);
-                let log = Log {
-                   process_id: id,
-                   content: line.clone(),
-                   error: false
-                };
+                // let log = Log {
+                //    process_id: id,
+                //    content: line.clone(),
+                //    error: false
+                // };
                 // log_sender.send(log).expect("Error sending log.");
-                if let Err(e) = writeln!(log_file, "{}", line) {
+                if let Err(e) = writeln!(stdout_file, "{}", line) {
                     eprintln!("Couldn't write to file: {}", e);
                 }
             });
@@ -95,13 +96,13 @@ pub fn run(
             .filter_map(|line: Result<String, Error>| line.ok())
             .for_each(|line: String| {
                 println!("{}", line);
-                let log = Log {
-                   process_id: id,
-                   content: line.clone(),
-                   error: true
-                };
-                log_sender.send(log).expect("Error sending log.");
-                if let Err(e) = writeln!(log_file, "{}", line) {
+                // let log = Log {
+                //    process_id: id,
+                //    content: line.clone(),
+                //    error: true
+                // };
+                // log_sender.send(log).expect("Error sending log.");
+                if let Err(e) = writeln!(stderr_file, "{}", line) {
                     eprintln!("Couldn't write to file: {}", e);
                 }
             });

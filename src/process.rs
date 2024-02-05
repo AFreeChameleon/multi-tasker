@@ -1,3 +1,5 @@
+use std::fs::{File, OpenOptions};
+use std::io::Write;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -8,12 +10,13 @@ use chrono::{DateTime, Duration, Utc};
 pub struct Process {
     pub id: u8,
     pub command: String,
+    // You can just get uptime from the process
     pub started_at: DateTime<Utc>,
     pub pid: u32,
     pub status: String,
     pub cpu_usage: f32,
     pub memory_usage: u64,
-    pub user: String
+    pub user: String,
 }
 
 pub struct ProcessCommand {
@@ -67,10 +70,38 @@ impl LogManager {
 }
 
 impl ProcessManager {
-    pub fn add(&mut self, process: Process) {
+// pub struct Process {
+//     pub id: u8,
+//     pub command: String,
+//     // You can just get uptime from the process
+//     pub started_at: DateTime<Utc>,
+//     pub pid: u32,
+//     pub status: String,
+//     pub cpu_usage: f32,
+//     pub memory_usage: u64,
+//     pub user: String
+// }
+    pub fn write_to_status_file(&self, mut process: Process) {
+        let mut status_file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(format!("/tmp/main/{}/status.tmp", process.pid))
+            .unwrap();
+        // id, status, pid, user
+        status_file.write_all(format!(
+            "{}\n{}\n{}\n{}",
+            process.id,
+            process.status,
+            process.pid,
+            process.user
+        ).as_bytes());
+    }
+
+    pub fn add(&mut self, mut process: Process) {
         let mut processes = Arc::clone(&self.processes).to_vec();
-        processes.push(process);
+        processes.push(process.clone());
         self.processes = Arc::new(processes);
+        self.write_to_status_file(process);
     }
 
     pub fn remove(&mut self, process: Process) {
