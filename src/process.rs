@@ -85,7 +85,7 @@ impl ProcessManager {
         let mut status_file = OpenOptions::new()
             .write(true)
             .create(true)
-            .open(format!("/tmp/main/{}/status.tmp", process.pid))
+            .open(format!("/tmp/multi-tasker/main/{}/status.tmp", process.pid))
             .unwrap();
         // id, status, pid, user
         status_file.write_all(format!(
