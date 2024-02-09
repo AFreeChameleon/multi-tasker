@@ -8,6 +8,7 @@ mod process;
 mod server;
 mod client;
 mod constants;
+mod daemon;
 
 #[tokio::main]
 async fn main() {
@@ -15,7 +16,7 @@ async fn main() {
    
     if server_exists {
         println!("SERVER EXISTS");
-        client::send();
+        client::send().await;
     } else {
         fs::create_dir_all("/tmp/multi-tasker/main").unwrap();
         let stdout = File::create("/tmp/multi-tasker/main/daemon.out").unwrap();

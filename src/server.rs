@@ -1,4 +1,11 @@
-use std::{process, io::Write, sync::{Mutex, mpsc, Arc}, fs::{File, OpenOptions}, thread, time::Duration};
+use std::{
+    process,
+    io::Write,
+    sync::{Mutex, mpsc, Arc},
+    fs::{File, OpenOptions},
+    thread, time::Duration,
+    error::Error
+};
 use tokio::{io::{self, Interest}, net::{UnixStream, UnixListener, unix::SocketAddr}};
 
 use crate::commands;
@@ -6,12 +13,13 @@ use crate::process::{ProcessManager, LogManager, Channel};
 use crate::constants::Constants;
 
 pub async fn listen() {
-    let server = UnixListener::bind(&Constants::get_socket_path()).unwrap();
+    let mut server = UnixListener::bind(&Constants::get_socket_path()).unwrap();
     let mut status_file = OpenOptions::new()
         .write(true)
         .create(true)
-        .open("/tmp/multi-tasker/main/status.tmp")
+        .open(&Constants::get_status_file())
         .unwrap();
+    println!("{}", std::process::id());
     // id, status, pid, user
     status_file.write_all(format!(
         "{}\n{}\n{}\n{}",
@@ -23,7 +31,10 @@ pub async fn listen() {
     println!("Listening...");
     loop {
         match server.accept().await {
-            Ok((stream, addr)) => listen_socket(stream, addr).await,
+            // Ok((stream, addr)) => listen_socket(stream, addr).await.unwrap(),
+            Ok((stream, addr)) => {
+                println!("NEW CLIENTTTT");
+            },
             Err(e) => {
                 status_file.write_all(
                     format!(
@@ -62,7 +73,7 @@ pub async fn listen() {
     process_manager.listen();
 }
 
-async fn listen_socket(stream: UnixStream, addr: SocketAddr) {
+async fn listen_socket(stream: UnixStream, addr: SocketAddr) -> Result<(), Box<dyn Error>>{
     println!("new client");
     loop {
         let ready = stream.ready(Interest::READABLE).await.unwrap();
@@ -72,13 +83,13 @@ async fn listen_socket(stream: UnixStream, addr: SocketAddr) {
 
             match stream.try_read(&mut data) {
                 Ok(n) => {
-                    println!("read {} bytes", n);
+                    println!("read {} bytes {:?}", n, data);
                 }
                 Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
                     continue;
                 }
                 Err(e) => {
-                    return;
+                    return Err(e.into());
                 }
             }
         }
