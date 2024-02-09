@@ -70,17 +70,6 @@ impl LogManager {
 }
 
 impl ProcessManager {
-// pub struct Process {
-//     pub id: u8,
-//     pub command: String,
-//     // You can just get uptime from the process
-//     pub started_at: DateTime<Utc>,
-//     pub pid: u32,
-//     pub status: String,
-//     pub cpu_usage: f32,
-//     pub memory_usage: u64,
-//     pub user: String
-// }
     pub fn write_to_status_file(&self, mut process: Process) {
         let mut status_file = OpenOptions::new()
             .write(true)
@@ -136,22 +125,3 @@ impl ProcessManager {
     }
 }
 
-
-
-// pub fn test_processes() {
-//     let mut process_manager = ProcessManager {
-//         processes: Vec::new()
-//     };
-//     let new_process = Process {
-//         id: 0,
-//         command: "npm start".to_string(),
-//         started_at: Utc::now(),
-//         pid: 3000,
-//         status: "Running".to_string(),
-//         cpu_usage: 3.02,
-//         memory_usage: 1000,
-//         user: "root".to_string()
-//     };
-//     process_manager.add(new_process);
-//     println!("{:?}", process_manager.processes);
-// }

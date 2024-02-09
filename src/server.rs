@@ -1,12 +1,42 @@
 use std::{process, io::Write, sync::{Mutex, mpsc, Arc}, fs::{File, OpenOptions}, thread, time::Duration};
-use tokio::{io, net::UnixListener};
+use tokio::{io::{self, Interest}, net::{UnixStream, UnixListener, unix::SocketAddr}};
 
 use crate::commands;
 use crate::process::{ProcessManager, LogManager, Channel};
+use crate::constants::Constants;
 
-const SOCKET_PATH: &str = "/tmp/main/multi-tasker.sock";
 pub async fn listen() {
-    let server = UnixListener::bind(SOCKET_PATH).unwrap();
+    let server = UnixListener::bind(&Constants::get_socket_path()).unwrap();
+    let mut status_file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .open("/tmp/multi-tasker/main/status.tmp")
+        .unwrap();
+    // id, status, pid, user
+    status_file.write_all(format!(
+        "{}\n{}\n{}\n{}",
+        "main",
+        "Running".to_string(),
+        std::process::id(),
+        whoami::username(),
+    ).as_bytes());
+    println!("Listening...");
+    loop {
+        match server.accept().await {
+            Ok((stream, addr)) => listen_socket(stream, addr).await,
+            Err(e) => {
+                status_file.write_all(
+                    format!(
+                        "{}\n{}\n{}\n{}",
+                        "main",
+                        "Stopped".to_string(),
+                        std::process::id(),
+                        whoami::username(),
+                    ).as_bytes()
+                );
+            }
+        }
+    }
     let (process_tx, process_rx) = mpsc::channel();
     let (log_tx, log_rx) = mpsc::channel();
     let mut process_manager = ProcessManager {
@@ -30,33 +60,27 @@ pub async fn listen() {
     );
     log_manager.listen();
     process_manager.listen();
-    let mut status_file = OpenOptions::new()
-        .write(true)
-        .create(true)
-        .open("/tmp/multi-tasker/main/status.tmp")
-        .unwrap();
-    // id, status, pid, user
-    status_file.write_all(format!(
-        "{}\n{}\n{}\n{}",
-        "main",
-        "Running".to_string(),
-        std::process::id(),
-        whoami::username(),
-    ).as_bytes());
-    println!("Listening...");
+}
+
+async fn listen_socket(stream: UnixStream, addr: SocketAddr) {
+    println!("new client");
     loop {
-        match server.accept().await {
-            Ok((stream, addr)) => {
-                println!("new client");
-            },
-            Err(e) => {}
+        let ready = stream.ready(Interest::READABLE).await.unwrap();
+
+        if ready.is_readable() {
+            let mut data = vec![0; 1024];
+
+            match stream.try_read(&mut data) {
+                Ok(n) => {
+                    println!("read {} bytes", n);
+                }
+                Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
+                    continue;
+                }
+                Err(e) => {
+                    return;
+                }
+            }
         }
     }
-    status_file.write_all(format!(
-        "{}\n{}\n{}\n{}",
-        "main",
-        "Stopped".to_string(),
-        std::process::id(),
-        whoami::username(),
-    ).as_bytes());
 }
