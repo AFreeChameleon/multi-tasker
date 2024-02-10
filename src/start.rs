@@ -15,14 +15,13 @@ use bincode;
 use glob;
 
 use crate::task::{Task, TaskManager};
+use crate::command::{CommandData, CommandManager};
 
-#[derive(serde::Serialize)]
-struct Data {
-    command: String,
-    pid: u32
-}
-
-pub fn start() {
+pub fn run() -> Result<(), String> {
+    let command = match args().nth(2) {
+        Some(val) => val,
+        None => return Err("Missing command, usage: mult start \"[command]\"".to_string())
+    };
     let mut new_task_id = 0;
     let mut tasks: Vec<Task> = TaskManager::get_tasks();
     if let Some(last_task) = tasks.last() {
@@ -38,8 +37,6 @@ pub fn start() {
     fs::create_dir_all(
         process_dir
     ).unwrap();
-    let mode = args().nth(1).expect("No mode given.");
-    let command = args().nth(2).expect("No command given.");
 
     let stdout = File::create(process_dir.join("stdout.out")).unwrap();
     let stderr = File::create(process_dir.join("stderr.err")).unwrap();
@@ -55,6 +52,7 @@ pub fn start() {
         Ok(_) => run_command(&command, &process_dir),
         Err(e) => eprintln!("Error, {}", e)
     };
+    Ok(())
 }
 
 fn run_command(command: &str, process_dir: &Path) {
@@ -63,12 +61,10 @@ fn run_command(command: &str, process_dir: &Path) {
         .spawn()
         .expect("Command has failed.");
 
-    let data = Data {
+    let data = CommandData {
         command: command.to_string(),
         pid: child.id()
     };
-    let encoded_data: Vec<u8> = bincode::serialize::<Data>(&data).unwrap();
-    let mut process_file = File::create(process_dir.join("data.bin")).unwrap();
-    process_file.write_all(&encoded_data).unwrap();
+    CommandManager::write_command_data(data, process_dir);
 }
 

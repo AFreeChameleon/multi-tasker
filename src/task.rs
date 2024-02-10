@@ -11,7 +11,7 @@ use std::{
 
 use bincode;
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Task {
     pub id: u32
 }
