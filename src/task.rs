@@ -10,6 +10,7 @@ use std::{
 };
 
 use bincode;
+use sysinfo::{ProcessStatus};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Task {
@@ -37,5 +38,12 @@ impl TaskManager {
         let encoded_data: Vec<u8> = bincode::serialize::<Vec<Task>>(&new_tasks).unwrap();
         tasks_file.write_all(&encoded_data).unwrap();
     }
+}
+
+pub struct Process {
+    pub memory_usage: u64,
+    pub status: ProcessStatus,
+    pub cpu_usage: f32,
+    pub runtime: u64
 }
 
