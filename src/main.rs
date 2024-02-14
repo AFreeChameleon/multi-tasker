@@ -4,6 +4,7 @@ use whoami;
 
 mod start;
 mod stop;
+mod ls;
 mod task;
 mod command;
 

@@ -29,8 +29,8 @@ pub fn run() -> Result<(), String> {
         Ok(data) => data,
         Err(message) => return Err(message)
     };
-    let s = System::new_all();
-    if let Some(process) = s.process(Pid::from_u32(command.pid)) {
+    let sys = System::new_all();
+    if let Some(process) = sys.process(Pid::from_u32(command.pid)) {
         process.kill();
     } else {
         return Err("Process is not running.".to_string())
