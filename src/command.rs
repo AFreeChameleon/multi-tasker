@@ -22,7 +22,6 @@ impl CommandManager {
     pub fn read_command_data(task_id: u32) -> Result<CommandData, String> {
         let dir_str = format!("{}/.multi-tasker/processes/{}", home::home_dir().unwrap().display(), task_id);
         let data_file = Path::new(&dir_str).join("data.bin");
-        println!("{}", dir_str);
         if data_file.exists() {
             let data_encoded: Vec<u8> = fs::read(data_file).unwrap(); 
             let data_decoded: CommandData = bincode::deserialize(&data_encoded[..]).unwrap();

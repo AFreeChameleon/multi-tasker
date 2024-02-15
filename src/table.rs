@@ -1,5 +1,9 @@
+use std::fmt::Display;
+
 use ascii_table::AsciiTable;
+use prettytable::{Table, Cell, Row, row, format};
 use sysinfo::ProcessStatus;
+use colored::Colorize;
 
 pub struct MainHeaders {
     pub id: u32,
@@ -25,19 +29,26 @@ pub struct TableRow {
 }
 
 pub struct TableManager {
-    pub ascii_table: AsciiTable,
+    pub ascii_table: Table,
     pub table_data: Vec<Vec<String>>
 }
 
+// ─
+// │
+// ┼
+// ┌
+// ┐
 impl TableManager {
     pub fn create_headers(&mut self) {
-        self.ascii_table.column(0).set_header("id");
-        self.ascii_table.column(1).set_header("command");
-        self.ascii_table.column(2).set_header("pid");
-        self.ascii_table.column(3).set_header("memory");
-        self.ascii_table.column(4).set_header("cpu");
-        self.ascii_table.column(5).set_header("runtime");
-        self.ascii_table.column(6).set_header("status");
+        self.ascii_table.set_titles(Row::new(vec![
+            Cell::new("id").style_spec("b"),
+            Cell::new("command").style_spec("b"),
+            Cell::new("pid").style_spec("b"),
+            Cell::new("status").style_spec("b"),
+            Cell::new("memory").style_spec("b"),
+            Cell::new("cpu").style_spec("b"),
+            Cell::new("runtime").style_spec("b"),
+        ]));
     }
 
     pub fn insert_row(
@@ -45,33 +56,64 @@ impl TableManager {
         headers: MainHeaders,
         process: Option<ProcessHeaders>
     ) {
-        let mut row = vec![
-            headers.id.to_string(),
-            headers.command,
-            headers.pid.to_string(),
+        let mut row: Vec<Cell> = vec![
+            Cell::new(&headers.id.to_string()),
+            Cell::new(&headers.command),
+            Cell::new(&headers.pid.to_string()),
         ];
         if let Some(p) = process {
             row.extend(vec![
-                p.memory.to_string(),
-                p.cpu.to_string(),
-                p.runtime.to_string(),
-                p.status.to_string()
+                Cell::new(&p.status.to_string()).style_spec("b"),
+                Cell::new(&p.memory.to_string()),
+                Cell::new(&p.cpu.to_string()),
+                Cell::new(&p.runtime.to_string())
             ]);
         } else {
             row.extend(vec![
-                "N/A".to_string(),
-                "N/A".to_string(),
-                "N/A".to_string(),
-                "Stopped".to_string()
+               Cell::new("Stopped").style_spec("Frb"),
+               Cell::new("N/A"),
+               Cell::new("N/A"),
+               Cell::new("N/A")
             ]);
         }
-        println!("{:?}", row);
-        self.table_data.push(row);
+
+        self.ascii_table.add_row(Row::new(row));
     }
 
-    pub fn print(&self) {
-        println!("{:?}", &self.table_data);
-        self.ascii_table.print(&self.table_data);
+    pub fn print(&mut self) {
+        self.ascii_table.set_format(
+            format::FormatBuilder::new()
+                .column_separator('│')
+                .borders('│')
+                .separators(
+                    &[format::LinePosition::Top],
+                    format::LineSeparator::new('─', '┬', '┌', '┐'),
+                )
+                .separators(
+                    &[format::LinePosition::Title],
+                    format::LineSeparator::new('─', '┼', '├', '┤'),
+                )
+                .separators(
+                    &[format::LinePosition::Bottom],
+                    format::LineSeparator::new('─', '┴', '└', '┘'),
+                )
+                .padding(1, 1)
+                .build(),
+        );
+        self.ascii_table.printstd();
+    }
+
+
+    pub fn print_test() {
+        let mut table = Table::new();
+
+        table.add_row(Row::new(vec![
+            Cell::new("ABC").style_spec("Frb"),
+            Cell::new("DEFG").style_spec("b"),
+            Cell::new("HJKLMN").style_spec("b")
+        ]));
+
+        table.printstd();
     }
 }
 

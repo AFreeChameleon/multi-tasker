@@ -9,6 +9,7 @@ use std::{
     path::Path
 };
 use home;
+use prettytable::Table;
 use serde::Serialize;
 use daemonize::Daemonize;
 use bincode;
@@ -22,7 +23,7 @@ use crate::command::{CommandData, CommandManager};
 
 pub fn run() -> Result<(), String> {
     let mut table = TableManager {
-        ascii_table: AsciiTable::default(),
+        ascii_table: Table::new(),
         table_data: Vec::new()
     };
     table.create_headers();

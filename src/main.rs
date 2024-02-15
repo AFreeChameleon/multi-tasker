@@ -24,6 +24,7 @@ fn main() {
                 Ok(()) => (),
                 Err(message) => println!("{}", message)
             },
+            "test" => table::TableManager::print_test(),
             _ => println!("Command not start|stop|ls")
         };
     } else {
