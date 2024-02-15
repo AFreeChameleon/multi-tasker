@@ -8,10 +8,10 @@ use colored::Colorize;
 pub struct MainHeaders {
     pub id: u32,
     pub command: String,
-    pub pid: u32
 }
 
 pub struct ProcessHeaders {
+    pub pid: u32,
     pub memory: u64,
     pub cpu: f32,
     pub runtime: u64,
@@ -59,10 +59,10 @@ impl TableManager {
         let mut row: Vec<Cell> = vec![
             Cell::new(&headers.id.to_string()),
             Cell::new(&headers.command),
-            Cell::new(&headers.pid.to_string()),
         ];
         if let Some(p) = process {
             row.extend(vec![
+                Cell::new(&p.pid.to_string()),
                 Cell::new(&p.status.to_string()).style_spec("Fgb"),
                 Cell::new(&p.memory.to_string()),
                 Cell::new(&p.cpu.to_string()),
@@ -70,10 +70,11 @@ impl TableManager {
             ]);
         } else {
             row.extend(vec![
-               Cell::new("Stopped").style_spec("Frb"),
-               Cell::new("N/A"),
-               Cell::new("N/A"),
-               Cell::new("N/A")
+                Cell::new("N/A"),
+                Cell::new("Stopped").style_spec("Frb"),
+                Cell::new("N/A"),
+                Cell::new("N/A"),
+                Cell::new("N/A")
             ]);
         }
 

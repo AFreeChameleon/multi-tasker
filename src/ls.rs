@@ -1,25 +1,9 @@
-use std::{
-    process::{Command, Stdio, ChildStdout, ChildStderr},
-    io::Write,
-    sync::{Mutex, mpsc, Arc},
-    fs::{self, File, OpenOptions},
-    thread,
-    time::Duration,
-    env::args,
-    path::Path
-};
-use home;
 use prettytable::Table;
-use serde::Serialize;
-use daemonize::Daemonize;
-use bincode;
-use glob;
 use sysinfo::{System, Pid};
-use ascii_table::AsciiTable;
 
 use crate::{table::{MainHeaders, ProcessHeaders}, task::{Task, TaskManager}};
-use crate::table::{TableManager, TableRow};
-use crate::command::{CommandData, CommandManager};
+use crate::table::TableManager;
+use crate::command::CommandManager;
 
 pub fn run() -> Result<(), String> {
     let mut table = TableManager {
@@ -38,11 +22,11 @@ pub fn run() -> Result<(), String> {
         let main_headers = MainHeaders {
             id: task.id,
             command: command.command,
-            pid: command.pid,
         };
         if let Some(process) = sys.process(Pid::from_u32(command.pid)) {
             // Get memory stats
             let process_headers = ProcessHeaders {
+                pid: command.pid,
                 memory: process.virtual_memory(),
                 cpu: process.cpu_usage(),
                 runtime: process.run_time(),
