@@ -17,7 +17,7 @@ use glob;
 use sysinfo::{System, Pid};
 use ascii_table::AsciiTable;
 
-use crate::{table::{MainHeaders, ProcessHeaders}, task::{Process, Task, TaskManager}};
+use crate::{table::{MainHeaders, ProcessHeaders}, task::{Task, TaskManager}};
 use crate::table::{TableManager, TableRow};
 use crate::command::{CommandData, CommandManager};
 
@@ -46,7 +46,7 @@ pub fn run() -> Result<(), String> {
                 memory: process.virtual_memory(),
                 cpu: process.cpu_usage(),
                 runtime: process.run_time(),
-                status: process.status()
+                status: "Running".to_string()
             };
 
             table.insert_row(main_headers, Some(process_headers));

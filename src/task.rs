@@ -28,7 +28,7 @@ impl TaskManager {
             let tasks_decoded: Vec<Task> = bincode::deserialize(&tasks_encoded[..]).unwrap();
             return tasks_decoded;
         }
-        return Vec::new();
+        Vec::new()
     }
 
     pub fn write_tasks_file(new_tasks: Vec<Task>) {
@@ -40,10 +40,4 @@ impl TaskManager {
     }
 }
 
-pub struct Process {
-    pub memory_usage: u64,
-    pub status: ProcessStatus,
-    pub cpu_usage: f32,
-    pub runtime: u64
-}
 

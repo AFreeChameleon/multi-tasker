@@ -63,7 +63,7 @@ impl TableManager {
         ];
         if let Some(p) = process {
             row.extend(vec![
-                Cell::new(&p.status.to_string()).style_spec("Fgb"),
+                Cell::new(&p.status.to_string()).style_spec("b"),
                 Cell::new(&p.memory.to_string()),
                 Cell::new(&p.cpu.to_string()),
                 Cell::new(&p.runtime.to_string())
