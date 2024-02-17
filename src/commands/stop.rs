@@ -1,22 +1,6 @@
-use std::{
-    process::{Command, Stdio, ChildStdout, ChildStderr},
-    io::Write,
-    sync::{Mutex, mpsc, Arc},
-    fs::{self, File, OpenOptions},
-    thread,
-    time::Duration,
-    env::args,
-    path::Path
-};
 use sysinfo::{Pid, System};
-use home;
-use serde::Serialize;
-use daemonize::Daemonize;
-use bincode;
-use glob;
 
-use crate::task::{Task, TaskManager};
-use crate::command::{CommandData, CommandManager};
+use crate::task::TaskManager;
 
 pub fn run() -> Result<(), String> {
     let (_, command_data, _) = match TaskManager::get_task_from_arg(2) {

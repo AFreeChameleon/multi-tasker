@@ -5,7 +5,7 @@ use std::{
     path::Path
 };
 
-use crate::manager::task::{Files, TaskManager};
+use crate::manager::task::Files;
 use crate::manager::command::{CommandData, CommandManager};
 
 pub fn daemonize_task(files: Files, command: String) {
@@ -22,7 +22,7 @@ pub fn daemonize_task(files: Files, command: String) {
 }
 
 fn run_command(command: &str, process_dir: &Path) {
-    let mut child = Command::new("sh")
+    let child = Command::new("sh")
         .args(&["-c", &command])
         .spawn()
         .expect("Command has failed.");

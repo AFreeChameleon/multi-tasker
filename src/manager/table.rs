@@ -1,9 +1,4 @@
-use std::fmt::Display;
-
-use ascii_table::AsciiTable;
-use prettytable::{Table, Cell, Row, row, format};
-use sysinfo::ProcessStatus;
-use colored::Colorize;
+use prettytable::{Table, Cell, Row, format};
 
 pub struct MainHeaders {
     pub id: u32,
@@ -16,16 +11,6 @@ pub struct ProcessHeaders {
     pub cpu: f32,
     pub runtime: u64,
     pub status: String
-}
-
-pub struct TableRow {
-    pub id: u32,
-    pub command: String,
-    pub pid: u32,
-    pub memory: u64,
-    pub cpu: f32,
-    pub runtime: u64,
-    pub status: ProcessStatus
 }
 
 pub struct TableManager {

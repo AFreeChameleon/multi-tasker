@@ -1,9 +1,6 @@
-use std::{
-    env::args,
-};
+use std::env::args;
 
-use crate::task::{Task, TaskManager, Files};
-use crate::command::{CommandData, CommandManager};
+use crate::task::{Task, TaskManager};
 use crate::linux;
 
 pub fn run() -> Result<(), String> {

@@ -1,19 +1,13 @@
 use std::{
-    process::{Command, Stdio, ChildStdout, ChildStderr},
     io::Write,
-    sync::{Mutex, mpsc, Arc},
-    fs::{self, File, OpenOptions},
-    thread,
-    time::Duration,
+    fs::{self, File},
     env::args,
     path::Path
 };
 
 use bincode;
-use sysinfo::{ProcessStatus};
 
 use crate::manager::command::{CommandData, CommandManager};
-use crate::linux;
 
 pub struct Files {
     pub process_dir: Box<Path>,
@@ -49,7 +43,7 @@ impl TaskManager {
     }
 
     pub fn get_task_from_arg(nth_arg: usize) -> Result<(Task, CommandData, Vec<Task>), String> {
-        let mut tasks: Vec<Task> = TaskManager::get_tasks();
+        let tasks: Vec<Task> = TaskManager::get_tasks();
         let task_id: u32 = match args().nth(nth_arg) {
             Some(arg) => match arg.parse::<u32>() {
                 Ok(id) => id,

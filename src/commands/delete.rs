@@ -1,11 +1,6 @@
-use std::{
-    env::args,
-    fs
-};
+use std::fs;
 
-use crate::task::{Task, TaskManager, Files};
-use crate::command::{CommandData, CommandManager};
-use crate::linux;
+use crate::task::TaskManager;
 use crate::stop::kill_process;
 
 pub fn run() -> Result<(), String> {
@@ -28,6 +23,5 @@ pub fn run() -> Result<(), String> {
         Err(msg) => return Err(format!("{:?}", msg))
     };
     TaskManager::write_tasks_file(new_tasks.collect());
-    println!("Process deleted.");
     Ok(())
 }

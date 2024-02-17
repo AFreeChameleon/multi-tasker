@@ -1,6 +1,4 @@
-use std::{env::args, io::Write, sync::{Mutex, mpsc, Arc}, fs::{self, File, OpenOptions}, thread, time::Duration};
-use daemonize::Daemonize;
-use whoami;
+use std::env::args;
 
 mod commands;
 mod manager;
