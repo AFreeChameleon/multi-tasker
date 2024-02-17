@@ -12,6 +12,15 @@ use std::{
 use bincode;
 use sysinfo::{ProcessStatus};
 
+use crate::manager::command::{CommandData, CommandManager};
+use crate::linux;
+
+pub struct Files {
+    pub process_dir: Box<Path>,
+    pub stdout: File,
+    pub stderr: File
+}
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Task {
     pub id: u32
@@ -38,6 +47,28 @@ impl TaskManager {
         let encoded_data: Vec<u8> = bincode::serialize::<Vec<Task>>(&new_tasks).unwrap();
         tasks_file.write_all(&encoded_data).unwrap();
     }
-}
 
+    pub fn generate_task_files(task_id: u32, tasks: Vec<Task>) -> Files {
+        let dir_str = format!(
+            "{}/.multi-tasker/processes/{}",
+            home::home_dir().unwrap().display(),
+            &task_id 
+            );
+        let process_dir = Path::new(&dir_str);
+        fs::create_dir_all(
+            process_dir
+            ).unwrap();
+
+        let stdout = File::create(process_dir.join("stdout.out")).unwrap();
+        let stderr = File::create(process_dir.join("stderr.err")).unwrap();
+
+        TaskManager::write_tasks_file(tasks);
+
+        Files {
+            process_dir: process_dir.into(),
+            stdout,
+            stderr
+        }
+    }
+}
 

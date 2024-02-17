@@ -2,16 +2,20 @@ use std::{env::args, io::Write, sync::{Mutex, mpsc, Arc}, fs::{self, File, OpenO
 use daemonize::Daemonize;
 use whoami;
 
-mod start;
-mod stop;
-mod ls;
-mod task;
-mod command;
-mod table;
+mod commands;
+mod manager;
+mod linux;
+
+use commands::{create, start, stop, ls};
+use manager::{task, command, table};
 
 fn main() {
     if let Some(mode) = args().nth(1) {
         match mode.as_str() {
+            "create" => match create::run() {
+                Ok(()) => println!("Command finished."),
+                Err(message) => println!("{}", message)
+            },
             "start" => match start::run() {
                 Ok(()) => println!("Command finished."),
                 Err(message) => println!("{}", message)
