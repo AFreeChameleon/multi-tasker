@@ -1,18 +1,6 @@
 use std::{
-    process::{Command, Stdio, ChildStdout, ChildStderr},
-    io::Write,
-    sync::{Mutex, mpsc, Arc},
-    fs::{self, File, OpenOptions},
-    thread,
-    time::Duration,
     env::args,
-    path::Path
 };
-use home;
-use serde::Serialize;
-use daemonize::Daemonize;
-use bincode;
-use glob;
 
 use crate::task::{Task, TaskManager, Files};
 use crate::command::{CommandData, CommandManager};

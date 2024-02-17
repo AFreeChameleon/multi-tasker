@@ -6,7 +6,7 @@ mod commands;
 mod manager;
 mod linux;
 
-use commands::{create, start, stop, ls};
+use commands::{create, delete, ls, start, stop};
 use manager::{task, command, table};
 
 fn main() {
@@ -17,11 +17,15 @@ fn main() {
                 Err(message) => println!("{}", message)
             },
             "start" => match start::run() {
-                Ok(()) => println!("Command finished."),
+                Ok(()) => println!("Process finished."),
                 Err(message) => println!("{}", message)
             },
             "stop" => match stop::run() {
                 Ok(()) => println!("Process stopped."),
+                Err(message) => println!("{}", message)
+            },
+            "delete" => match delete::run() {
+                Ok(()) => println!("Process deleted."),
                 Err(message) => println!("{}", message)
             },
             "ls" => match ls::run() {

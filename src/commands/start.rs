@@ -11,12 +11,12 @@ use std::{
 };
 use home;
 use serde::Serialize;
-use daemonize::Daemonize;
 use bincode;
 use glob;
 
 use crate::task::{Task, TaskManager};
 use crate::command::{CommandData, CommandManager};
+use crate::linux;
 
 pub fn run() -> Result<(), String> {
     let mut tasks: Vec<Task> = TaskManager::get_tasks();
@@ -31,9 +31,16 @@ pub fn run() -> Result<(), String> {
         Some(t) => t,
         None => return Err("No task exists with that id, use mult ls to see the available tasks.".to_string())
     };
-    let command = match CommandManager::read_command_data(task.id) {
+    let command_data = match CommandManager::read_command_data(task.id) {
         Ok(data) => data,
         Err(message) => return Err(message)
     };
+    let files = TaskManager::generate_task_files(task.id, tasks);
+    println!("Running command...");
+    if cfg!(target_os = "linux") {
+        linux::daemonize_task(files, command_data.command);
+    } else {
+        println!("Linux is only supported at the moment");
+    }
     Ok(())
 }

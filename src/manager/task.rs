@@ -48,16 +48,38 @@ impl TaskManager {
         tasks_file.write_all(&encoded_data).unwrap();
     }
 
+    pub fn get_task_from_arg(nth_arg: usize) -> Result<(Task, CommandData, Vec<Task>), String> {
+        let mut tasks: Vec<Task> = TaskManager::get_tasks();
+        let task_id: u32 = match args().nth(nth_arg) {
+            Some(arg) => match arg.parse::<u32>() {
+                Ok(id) => id,
+                Err(_) => return Err("Invalid id, usage: mult start \"[command]\"".to_string())
+            },
+            None => return Err("Missing/invalid id, usage: mult start \"[command]\"".to_string())
+        };
+
+        let task: Task = match tasks.iter().find(|&t| t.id == task_id).cloned() {
+            Some(t) => t,
+            None => return Err("No task exists with that id, use mult ls to see the available tasks.".to_string())
+        };
+        let command_data = match CommandManager::read_command_data(task.id) {
+            Ok(data) => data,
+            Err(message) => return Err(message)
+        };
+
+        Ok((task, command_data, tasks))
+    }
+
     pub fn generate_task_files(task_id: u32, tasks: Vec<Task>) -> Files {
         let dir_str = format!(
             "{}/.multi-tasker/processes/{}",
             home::home_dir().unwrap().display(),
             &task_id 
-            );
+        );
         let process_dir = Path::new(&dir_str);
         fs::create_dir_all(
             process_dir
-            ).unwrap();
+        ).unwrap();
 
         let stdout = File::create(process_dir.join("stdout.out")).unwrap();
         let stderr = File::create(process_dir.join("stderr.err")).unwrap();
