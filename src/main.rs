@@ -1,11 +1,11 @@
 use std::env::args;
 
 mod commands;
-mod manager;
+mod managers;
 mod linux;
 
-use commands::{create, delete, ls, start, stop};
-use manager::{task, command, table};
+use commands::{create, delete, ls, start, stop, logs};
+use managers::{task, command, table};
 
 fn main() {
     if let Some(mode) = args().nth(1) {
@@ -20,6 +20,10 @@ fn main() {
             },
             "stop" => match stop::run() {
                 Ok(()) => println!("Process stopped."),
+                Err(message) => println!("{}", message)
+            },
+            "logs" => match logs::run() {
+                Ok(()) => println!("Logs stopped."),
                 Err(message) => println!("{}", message)
             },
             "delete" => match delete::run() {

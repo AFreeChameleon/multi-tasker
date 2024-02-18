@@ -7,7 +7,7 @@ use std::{
 
 use bincode;
 
-use crate::manager::command::{CommandData, CommandManager};
+use crate::command::{CommandData, CommandManager};
 
 pub struct Files {
     pub process_dir: Box<Path>,

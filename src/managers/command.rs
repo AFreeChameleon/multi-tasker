@@ -22,7 +22,7 @@ impl CommandManager {
             let data_decoded: CommandData = bincode::deserialize(&data_encoded[..]).unwrap();
             return Ok(data_decoded)
         }
-        return Err("No task exists with that id.".to_string())
+        Err("No task exists with that id.".to_string())
     }
 
     pub fn write_command_data(command: CommandData, process_dir: &Path) {

@@ -5,8 +5,8 @@ use std::{
     path::Path
 };
 
-use crate::manager::task::Files;
-use crate::manager::command::{CommandData, CommandManager};
+use crate::task::Files;
+use crate::command::{CommandData, CommandManager};
 
 pub fn daemonize_task(files: Files, command: String) {
     let daemonize = Daemonize::new()
