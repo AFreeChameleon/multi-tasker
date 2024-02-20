@@ -4,6 +4,7 @@ use std::path::Path;
 use std::io::{Read, Seek, SeekFrom, BufReader, BufRead};
 use std::sync::mpsc::{self, Sender};
 use std::time::Duration;
+use std::collections::VecDeque;
 use rev_lines::RevLines;
 
 use crate::task::TaskManager;
@@ -30,11 +31,6 @@ pub fn run() -> Result<(), String> {
     let mut err_file = File::open(&err_file_path).unwrap();
     let mut err_pos = fs::metadata(&err_file_path).unwrap().len();
 
-    let mut test_file = File::open("/home/bean/test.txt").unwrap();
-    let rev_lines = RevLines::new(test_file).take(15);
-    for line in rev_lines {
-        println!("{:?}", line);
-    }
 
     let mut out_watcher = notify::recommended_watcher(move |res| {
         match res {
@@ -72,5 +68,30 @@ pub fn run() -> Result<(), String> {
     }
 
     Ok(())
+}
+
+fn read_last_lines(
+    file: &File,
+    count: usize
+) -> Result<VecDeque<String>, String> {
+    let mut reader = BufReader::new(file);
+    let mut line = String::new();
+    let mut lines_cache = VecDeque::new();
+    loop {
+        let bytes_read = match reader.read_line(&mut line) {
+            Ok(l) => l,
+            Err(_) => return Err("Error while reading output file.".to_string())
+        };
+        if bytes_read == 0 {
+            break;
+        }
+        if lines_cache.len() == 15 {
+           lines_cache.pop_front(); 
+        }
+        println!("{}", line.trim());
+        lines_cache.push_back(line.clone());
+        line.clear();
+    }
+    Ok(lines_cache)
 }
 
