@@ -48,9 +48,9 @@ impl TaskManager {
         let task_id: u32 = match args().nth(nth_arg) {
             Some(arg) => match arg.parse::<u32>() {
                 Ok(id) => id,
-                Err(_) => return Err("Invalid id, usage: mult start \"[command]\"".to_string())
+                Err(_) => return Err("Invalid id, see 'mult help' for more.".to_string())
             },
-            None => return Err("Missing/invalid id, usage: mult start \"[command]\"".to_string())
+            None => return Err("Missing/invalid id, see 'mult help' for more.".to_string())
         };
 
         let task: Task = match tasks.iter().find(|&t| t.id == task_id).cloned() {

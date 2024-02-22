@@ -6,7 +6,7 @@ use crate::linux;
 pub fn run() -> Result<(), String> {
     let command = match args().nth(2) {
         Some(val) => val,
-        None => return Err("Missing command, usage: mult create \"[command]\"".to_string())
+        None => return Err("Missing command, see 'mult help' for more.".to_string())
     };
     let mut new_task_id = 0;
     let mut tasks: Vec<Task> = TaskManager::get_tasks();
