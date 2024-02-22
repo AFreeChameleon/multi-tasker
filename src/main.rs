@@ -1,37 +1,44 @@
-use std::{io::Write, sync::{Mutex, mpsc, Arc}, fs::{self, File, OpenOptions}, thread, time::Duration};
-use tokio::{io, net::UnixListener};
-use daemonize::Daemonize;
-use whoami;
+use std::env::args;
 
 mod commands;
-mod process;
-mod server;
-mod client;
-mod constants;
+mod managers;
+mod linux;
 
-#[tokio::main]
-async fn main() {
-    let server_exists = client::check_server_exists();
-   
-    if server_exists {
-        println!("SERVER EXISTS");
-        client::send();
-    } else {
-        fs::create_dir_all("/tmp/multi-tasker/main").unwrap();
-        let stdout = File::create("/tmp/multi-tasker/main/daemon.out").unwrap();
-        let stderr = File::create("/tmp/multi-tasker/main/daemon.err").unwrap();
-        let daemonize = Daemonize::new()
-            .user("bean")
-            .umask(0o112)
-            .stdout(stdout)
-            .stderr(stderr)
-            .privileged_action(|| "Executed before drop privileges");
+use commands::{create, delete, ls, start, stop, logs};
+use managers::{task, command, table};
 
-        match daemonize.start() {
-            Ok(_) => server::listen().await,
-            Err(e) => eprintln!("Error, {}", e)
+fn main() {
+    if let Some(mode) = args().nth(1) {
+        match mode.as_str() {
+            "create" => match create::run() {
+                Ok(()) => println!("Command finished."),
+                Err(message) => println!("{}", message)
+            },
+            "start" => match start::run() {
+                Ok(()) => println!("Process finished."),
+                Err(message) => println!("{}", message)
+            },
+            "stop" => match stop::run() {
+                Ok(()) => println!("Process stopped."),
+                Err(message) => println!("{}", message)
+            },
+            "logs" => match logs::run() {
+                Ok(()) => println!("Logs stopped."),
+                Err(message) => println!("{}", message)
+            },
+            "delete" => match delete::run() {
+                Ok(()) => println!("Process deleted."),
+                Err(message) => println!("{}", message)
+            },
+            "ls" => match ls::run() {
+                Ok(()) => (),
+                Err(message) => println!("{}", message)
+            },
+            "test" => table::TableManager::print_test(),
+            _ => println!("Command not start|stop|ls")
         };
+    } else {
+        println!("No mode given, usage: mult [start|stop|ls] [command|task id]");
     }
-
 }
 
