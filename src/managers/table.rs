@@ -83,18 +83,5 @@ impl TableManager {
         );
         self.ascii_table.printstd();
     }
-
-
-    pub fn print_test() {
-        let mut table = Table::new();
-
-        table.add_row(Row::new(vec![
-            Cell::new("ABC").style_spec("Frb"),
-            Cell::new("DEFG").style_spec("b"),
-            Cell::new("HJKLMN").style_spec("b")
-        ]));
-
-        table.printstd();
-    }
 }
 

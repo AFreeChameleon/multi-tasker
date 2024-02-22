@@ -4,7 +4,7 @@ mod commands;
 mod managers;
 mod linux;
 
-use commands::{create, delete, ls, start, stop, logs};
+use commands::{create, delete, ls, start, stop, logs, help};
 use managers::{task, command, table};
 
 fn main() {
@@ -30,15 +30,21 @@ fn main() {
                 Ok(()) => println!("Process deleted."),
                 Err(message) => println!("{}", message)
             },
+            "help" => match help::run() {
+                Ok(()) => (),
+                Err(message) => println!("{}", message)
+            },
             "ls" => match ls::run() {
                 Ok(()) => (),
                 Err(message) => println!("{}", message)
             },
-            "test" => table::TableManager::print_test(),
             _ => println!("Command not start|stop|ls")
         };
     } else {
-        println!("No mode given, usage: mult [start|stop|ls] [command|task id]");
+        println!("
+            No mode given, usage: mult [start|stop|ls] [command|task id]\n
+            For a full list of commands: mult help
+        ");
     }
 }
 
