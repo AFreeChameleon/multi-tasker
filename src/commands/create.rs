@@ -1,6 +1,8 @@
 use std::env::args;
 
 use crate::task::{Task, TaskManager};
+
+#[cfg(target_os = "linux")]
 use crate::linux;
 
 pub fn run() -> Result<(), String> {
@@ -17,6 +19,7 @@ pub fn run() -> Result<(), String> {
     let files = TaskManager::generate_task_files(new_task_id, tasks);
     println!("Running command...");
     if cfg!(target_os = "linux") {
+        #[cfg(target_os = "linux")]
         linux::daemonize_task(files, command);
     } else {
         println!("Linux is only supported at the moment");

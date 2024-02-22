@@ -1,4 +1,6 @@
 use crate::task::TaskManager;
+
+#[cfg(target_os = "linux")]
 use crate::linux;
 
 pub fn run() -> Result<(), String> {
@@ -9,6 +11,8 @@ pub fn run() -> Result<(), String> {
     let files = TaskManager::generate_task_files(task.id, tasks);
     println!("Running process...");
     if cfg!(target_os = "linux") {
+
+        #[cfg(target_os = "linux")]
         linux::daemonize_task(files, command_data.command);
     } else {
         println!("Linux is only supported at the moment");

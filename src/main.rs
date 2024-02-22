@@ -2,6 +2,8 @@ use std::env::args;
 
 mod commands;
 mod managers;
+
+#[cfg(target_os = "linux")]
 mod linux;
 
 use commands::{create, delete, ls, start, stop, logs, help};
