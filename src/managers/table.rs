@@ -18,11 +18,6 @@ pub struct TableManager {
     pub table_data: Vec<Vec<String>>
 }
 
-// ─
-// │
-// ┼
-// ┌
-// ┐
 impl TableManager {
     pub fn create_headers(&mut self) {
         self.ascii_table.set_titles(Row::new(vec![

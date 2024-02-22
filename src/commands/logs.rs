@@ -31,6 +31,22 @@ pub fn run() -> Result<(), String> {
     let mut err_file = File::open(&err_file_path).unwrap();
     let mut err_pos = fs::metadata(&err_file_path).unwrap().len();
 
+    // Reading last 15 lines from stdout and stderr
+    let last_lines_to_print = 15;
+    let mut combined_lines = read_last_lines(&out_file, last_lines_to_print)
+        .unwrap();
+    combined_lines.append(
+        &mut read_last_lines(&err_file, last_lines_to_print).unwrap()
+    );
+    // Sorting lines by time
+    let sorted_lines = match sort_last_lines(combined_lines) {
+        Ok(lines) => lines,
+        Err(msg) => return Err(msg)
+    };
+    println!("Printing the last 15 lines of logs.");
+    for i in 0..last_lines_to_print {
+        print!("{}", sorted_lines[i].content);
+    }
 
     let mut out_watcher = notify::recommended_watcher(move |res| {
         match res {
@@ -61,8 +77,10 @@ pub fn run() -> Result<(), String> {
     
     for res in rx {
         match res {
-            // Ok(line) => println!("{line}"),
-            Ok(line) => {},
+            Ok(line) => {
+                let (_, content) = line.split_once("|").expect("Logs missing time.");
+                println!("{content}")
+            },
             Err(error) => println!("Reciever error {error:?}")
         }
     }
@@ -85,13 +103,31 @@ fn read_last_lines(
         if bytes_read == 0 {
             break;
         }
-        if lines_cache.len() == 15 {
+        if lines_cache.len() == count {
            lines_cache.pop_front(); 
         }
-        println!("{}", line.trim());
         lines_cache.push_back(line.clone());
         line.clear();
     }
     Ok(lines_cache)
+}
+
+struct Log {
+    time_millis: u128,
+    content: String
+}
+fn sort_last_lines(
+    lines: VecDeque<String>
+) -> Result<Vec<Log>, String> {
+    let vecdeque_lines: VecDeque<Log> = lines.iter().map(|line: &String| {
+        let (time_string, content) = line.split_once("|").expect("Logs missing time.");
+        Log {
+            time_millis: time_string.parse::<u128>().expect("Log time not a valid integer."),
+            content: content.to_string()
+        }
+    }).collect();
+    let mut sorted_lines: Vec<Log> = Vec::from(vecdeque_lines);
+    sorted_lines.sort_by_key(|log: &Log| log.time_millis);
+    Ok(sorted_lines)
 }
 
