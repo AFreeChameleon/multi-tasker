@@ -1,16 +1,16 @@
-use notify::{RecommendedWatcher, RecursiveMode, Watcher, Config, Event};
-use std::fs::{self, File};
-use std::path::Path;
-use std::io::{Read, Seek, SeekFrom, BufReader, BufRead};
-use std::sync::mpsc::{self, Sender};
-use std::time::Duration;
-use std::collections::VecDeque;
-use rev_lines::RevLines;
+use notify::{RecursiveMode, Watcher};
+use std::{
+    fs::{self, File},
+    path::Path,
+    io::{Seek, SeekFrom, BufReader, BufRead},
+    sync::mpsc,
+    collections::VecDeque
+};
 
 use crate::task::TaskManager;
 
 pub fn run() -> Result<(), String> {
-    let (task, command_data, tasks) = match TaskManager::get_task_from_arg(2) {
+    let (task, _, _) = match TaskManager::get_task_from_arg(2) {
         Ok(val) => val,
         Err(msg) => return Err(msg)
     };

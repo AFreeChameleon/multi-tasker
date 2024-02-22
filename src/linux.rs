@@ -3,11 +3,10 @@ use daemonize::Daemonize;
 use std::{
     io::{BufRead, BufReader},
     path::Path,
-    process::{ChildStdout, Command, Stdio},
+    process::{Command, Stdio},
     thread,
     time::{SystemTime, UNIX_EPOCH},
 };
-use env_logger;
 
 use crate::task::Files;
 use crate::command::{CommandData, CommandManager};
