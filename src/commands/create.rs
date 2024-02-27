@@ -1,6 +1,6 @@
 use std::env::args;
 
-use crate::task::{Task, TaskManager};
+use crate::{task::{Task, TaskManager}, windows};
 
 #[cfg(target_os = "linux")]
 use crate::linux;
@@ -20,7 +20,11 @@ pub fn run() -> Result<(), String> {
     println!("Running command...");
     if cfg!(target_os = "linux") {
         #[cfg(target_os = "linux")]
-        linux::daemonize_task(files, command);
+        linux::daemonize_task(files, &command);
+    } else if cfg!(target_os = "windows") {
+        #[cfg(target_os = "windows")]
+        let batch_file_path = windows::generate_batch_file(new_task_id, &command).unwrap();
+        windows::daemonize_task(new_task_id, &command, batch_file_path);
     } else {
         println!("Linux is only supported at the moment");
     }

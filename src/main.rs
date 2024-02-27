@@ -5,6 +5,8 @@ mod managers;
 
 #[cfg(target_os = "linux")]
 mod linux;
+#[cfg(target_os = "windows")]
+mod windows;
 
 use commands::{create, delete, ls, start, stop, logs, help};
 use managers::{task, command, table};
