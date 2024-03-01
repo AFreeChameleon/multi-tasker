@@ -20,11 +20,6 @@ pub fn run() -> Result<(), String> {
         };
         let sys = System::new_all();
 
-        // test
-        for (pid, process) in sys.processes() {
-            println!("{} {}", pid, process.name());
-        }
-
         let main_headers = MainHeaders {
             id: task.id,
             command: command.command,

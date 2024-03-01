@@ -17,8 +17,8 @@ pub fn run() -> Result<(), String> {
     }
     tasks.push(Task { id: new_task_id });
     println!("Running command...");
+    let files = TaskManager::generate_task_files(new_task_id, tasks);
     if cfg!(target_os = "linux") {
-        let files = TaskManager::generate_task_files(new_task_id, tasks);
         #[cfg(target_os = "linux")]
         linux::daemonize_task(files, &command);
     } else if cfg!(target_os = "windows") {

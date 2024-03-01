@@ -26,6 +26,7 @@ impl CommandManager {
     }
 
     pub fn write_command_data(command: CommandData, process_dir: &Path) {
+        println!("{:?}", process_dir.display());
         let encoded_data: Vec<u8> = bincode::serialize::<CommandData>(&command).unwrap();
         let mut process_file = File::create(process_dir.join("data.bin")).unwrap();
         process_file.write_all(&encoded_data).unwrap();

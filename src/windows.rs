@@ -3,7 +3,7 @@ use std::{
     ptr, ffi::{c_void, OsStr, OsString}, fs::File, io::{self, BufRead, BufReader, Write}, mem::{self, size_of}, os::{windows::{ffi::OsStrExt, io::{AsRawHandle, FromRawHandle, RawHandle}}}, path::{Path, PathBuf}, process::{Command, Stdio}, thread, time::{SystemTime, UNIX_EPOCH}
 };
 use home;
-use windows::{core::{IntoParam, Error, HSTRING, PCWSTR, PWSTR}, Win32::{Foundation::{CloseHandle, SetHandleInformation, BOOL, HANDLE, HANDLE_FLAG_INHERIT}, Security::SECURITY_ATTRIBUTES, Storage::FileSystem::ReadFile, System::{Pipes::CreatePipe, Threading::{CreateProcessW, CREATE_NEW_CONSOLE, CREATE_NO_WINDOW, PROCESS_INFORMATION, STARTUPINFOW}, IO::OVERLAPPED}}};
+use windows::{core::{IntoParam, Error, HSTRING, PCWSTR, PWSTR}, Win32::{Foundation::{CloseHandle, SetHandleInformation, BOOL, HANDLE, HANDLE_FLAG_INHERIT}, Security::SECURITY_ATTRIBUTES, Storage::FileSystem::{ReadFile, WriteFile}, System::{Console::{GetStdHandle, STD_OUTPUT_HANDLE}, Pipes::CreatePipe, Threading::{CreateProcessW, CREATE_NEW_CONSOLE, CREATE_NO_WINDOW, PROCESS_INFORMATION, STARTF_USESTDHANDLES, STARTUPINFOW}, IO::OVERLAPPED}}};
 
 use crate::task::Files;
 use crate::command::{CommandData, CommandManager};
@@ -29,17 +29,18 @@ pub fn generate_batch_file(task_id: u32, command: &String) -> Result<String, Str
     Ok(batch_file_path.display().to_string())
 }
 
-fn create_pipe() -> Result<(*mut HANDLE, *mut HANDLE), String> {
-    let read_pipe: *mut HANDLE =  ptr::from_mut(&mut HANDLE::default());
-    let write_pipe: *mut HANDLE = ptr::from_mut(&mut HANDLE::default());
+fn create_pipe() -> Result<(HANDLE, HANDLE), String> {
+    // let read_pipe: HANDLE = ptr::from_mut(&mut HANDLE::default());
+    // let write_pipe: HANDLE = ptr::from_mut(&mut HANDLE::default());
+    let mut read_pipe: HANDLE = HANDLE::default();
+    let mut write_pipe: HANDLE = HANDLE::default();
     let mut sec = SECURITY_ATTRIBUTES::default();
     sec.nLength = u32::try_from(size_of::<SECURITY_ATTRIBUTES>()).unwrap();
     sec.lpSecurityDescriptor = ptr::null_mut();
     sec.bInheritHandle = true.into();
-
+    
     unsafe {
-        CreatePipe(read_pipe, write_pipe, Some(&mut sec), 0).unwrap();
-        SetHandleInformation(read_pipe.as_ref(), 0, HANDLE_FLAG_INHERIT).unwrap();
+        CreatePipe(ptr::from_mut(&mut read_pipe), ptr::from_mut(&mut write_pipe), Some(&mut sec), 0).unwrap();
     }
 
     Ok((read_pipe, write_pipe))
@@ -49,13 +50,28 @@ fn create_pipe() -> Result<(*mut HANDLE, *mut HANDLE), String> {
 
 pub fn daemonize_task(task_id: u32, command: &String) {
     let dir_str = format!(
-        "{}/.multi-tasker/processes/{}",
+        "{}\\.multi-tasker\\processes\\{}",
         home::home_dir().unwrap().display(),
         &task_id 
     );
 
-    let (read_pipe, write_pipe) = create_pipe().unwrap();
-    let process_info = spawn_console_process(OsStr::new(command));
+    let (in_read_pipe, in_write_pipe) = create_pipe().unwrap();
+    let (out_read_pipe, out_write_pipe) = create_pipe().unwrap();
+    unsafe {
+        match SetHandleInformation(out_read_pipe, 0, HANDLE_FLAG_INHERIT) {
+            Ok(_) => println!("Set handle for out pipe."),
+            Err(msg) => println!("Can't set handle information.")
+        };
+        match SetHandleInformation(in_write_pipe, 0, HANDLE_FLAG_INHERIT) {
+            Ok(_) => println!("Set handle for out pipe."),
+            Err(msg) => println!("Can't set handle information.")
+        };
+    }
+    let process_info = spawn_console_process(
+        OsStr::new(command),
+        out_write_pipe,
+        in_read_pipe
+    );
     println!("{:?}", process_info);
 
     let data = CommandData {
@@ -67,33 +83,52 @@ pub fn daemonize_task(task_id: u32, command: &String) {
     unsafe {
         CloseHandle(process_info.hThread).unwrap();
         CloseHandle(process_info.hProcess).unwrap();
-        CloseHandle(*write_pipe).unwrap();
+        CloseHandle(out_write_pipe).unwrap();
+        CloseHandle(in_read_pipe).unwrap();
+        CloseHandle(in_write_pipe).unwrap();
     }
 
     let mut buffer: [u8; 4096] = [0; 4096];
     let mut overlapped = OVERLAPPED::default();
-    loop {
-        let mut bytes_read = 0;
-        unsafe {
+    println!("Starttttttt");
+    unsafe {
+        let mut parent_std_out = GetStdHandle(STD_OUTPUT_HANDLE).unwrap();
+        loop {
+            let mut bytes_read = 0;
             match ReadFile(
-                *read_pipe,
+                out_read_pipe,
                 Some(&mut buffer),
                 Some(&mut bytes_read),
                 Some(&mut overlapped)
             ) {
-                Ok(val) => val,
-                Err(_) => println!("Unable to read file.")
+                Ok(val) => println!("{:?}", val),
+                Err(msg) => {
+                    println!("Error reading file {:?}", msg);
+                    break;
+                }
             };
-        };
-        if bytes_read == 0 {
-            break;
+            if bytes_read == 0 {
+                break;
+            }
+            match WriteFile(
+                parent_std_out,
+                Some(&mut buffer),
+                Some(&mut bytes_read),
+                Some(&mut overlapped)
+            ) {
+                Ok(val) => println!("Liiiine"),
+                Err(msg) => {
+                    println!("{:?}", msg);
+                    break;
+                }
+            }
+            println!("{:?}", buffer);
         }
-        println!("{:?}", buffer);
+
+        CloseHandle(out_read_pipe).unwrap();
     }
-    
-    unsafe {
-        CloseHandle(*read_pipe).unwrap();
-    }
+
+    println!("Finsihed");
 
     //std::option::Option::<*mut u32>::from(
     //    <*mut u32 as Into<*mut u32>>::into(buffer.len())
@@ -127,10 +162,16 @@ pub fn daemonize_task(task_id: u32, command: &String) {
 // https://stackoverflow.com/questions/75767291/how-to-prevent-a-child-process-from-inheriting-the-standard-handles-in-rust-on-w
 
 pub fn spawn_console_process(
-    command: &OsStr
+    command: &OsStr,
+    out_write_pipe: HANDLE,
+    in_read_pipe: HANDLE
 ) -> PROCESS_INFORMATION {
     let mut startupinfo = STARTUPINFOW {
         cb: mem::size_of::<STARTUPINFOW>() as u32,
+        hStdOutput: out_write_pipe,
+        hStdError: out_write_pipe,
+        hStdInput: in_read_pipe,
+        dwFlags: STARTF_USESTDHANDLES,
         ..Default::default()
     };
 
@@ -150,6 +191,5 @@ pub fn spawn_console_process(
             ptr::addr_of_mut!(process_information),
         ).expect("Failed to create process.");
     }
-    println!("GRRRR");
     return process_information;
 }
