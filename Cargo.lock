@@ -301,6 +301,7 @@ dependencies = [
  "colored",
  "daemonize",
  "home",
+ "libc",
  "notify",
  "prettytable",
  "serde",
