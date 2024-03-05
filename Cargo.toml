@@ -13,6 +13,7 @@ sysinfo = "0.30.5"
 colored = "2.1.0"
 prettytable = "0.10.0"
 notify = "6.1.1"
+term = "0.7"
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.53.0", features = [
