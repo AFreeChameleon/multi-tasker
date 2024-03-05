@@ -1,5 +1,4 @@
 #![cfg(target_os = "linux")]
-use daemonize::Daemonize;
 use std::{
     io::{BufRead, BufReader},
     path::Path,
@@ -7,21 +6,15 @@ use std::{
     thread,
     time::{SystemTime, UNIX_EPOCH},
 };
+use fork::{self, Fork};
 
 use crate::task::Files;
 use crate::command::{CommandData, CommandManager};
 
 pub fn daemonize_task(files: Files, command: String) {
-    let daemonize = Daemonize::new()
-        .umask(0o112)
-        .stdout(files.stdout)
-        .stderr(files.stderr)
-        .privileged_action(|| "Executed before drop privileges");
-
-    match daemonize.start() {
-        Ok(_) => run_command(&command, &files.process_dir),
-        Err(e) => eprintln!("Error, {}", e)
-    };
+    if let Ok(Fork::Child) = fork::daemon(false, false) {
+       run_command(&command, &files.process_dir); 
+    }
 }
 
 fn run_command(command: &str, process_dir: &Path) {

@@ -44,7 +44,7 @@ impl TableManager {
             row.extend(vec![
                 Cell::new(&p.pid.to_string()),
                 Cell::new(&p.status.to_string()).style_spec("Fgb"),
-                Cell::new(&p.memory.to_string()),
+                Cell::new(&format_bytes(p.memory as f64)),
                 Cell::new(&p.cpu.to_string()),
                 Cell::new(&p.runtime.to_string())
             ]);
@@ -83,5 +83,20 @@ impl TableManager {
         );
         self.ascii_table.printstd();
     }
+}
+
+const SUFFIX: [&str; 5] = ["B", "KiB", "MiB", "GiB", "TiB"];
+const UNIT: f64 = 1000.0;
+fn format_bytes(bytes: f64) -> String {
+    if bytes <= 0.0 {
+        return "0 B".to_string();
+    }
+    let base = bytes.log10() / UNIT.log10();
+
+    let result = format!("{:.1}", UNIT.powf(base - base.floor()),)
+        .trim_end_matches(".0")
+        .to_owned();
+
+    [&result, SUFFIX[base.floor() as usize]].join(" ")
 }
 
