@@ -14,12 +14,19 @@ pub fn run() -> Result<(), String> {
     table.create_headers();
     setup_table(&mut table).unwrap();
     
-    if env::args().nth(2).unwrap() == "--listen" {
-        listen().unwrap();
-    } else {
-        table.print();
-    }
-    
+    match env::args().nth(2) {
+        Some(val) => {
+            if val == "--listen" {
+                listen().unwrap();
+                return Ok(());
+            }
+            println!("Invalid argument.");
+        },
+        None => {
+            table.print();
+        }
+    };
+
     Ok(())
 }
 
