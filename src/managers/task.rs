@@ -35,7 +35,15 @@ impl TaskManager {
         Vec::new()
     }
 
-    pub fn write_tasks_file(new_tasks: Vec<Task>) {
+    pub fn get_task(tasks: &Vec<Task>, id: u32) -> Result<Task, String> {
+        let task: Task = match tasks.iter().find(|&t| t.id == id).cloned() {
+            Some(t) => t,
+            None => return Err("No task exists with that id, use mult ls to see the available tasks.".to_string())
+        };
+        Ok(task)
+    }
+
+    pub fn write_tasks_file(new_tasks: &Vec<Task>) {
         let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
         let tasks_file_dir = Path::new(&tasks_dir_str).join("tasks.bin");
         let mut tasks_file = File::create(tasks_file_dir).unwrap();
@@ -65,7 +73,7 @@ impl TaskManager {
         Ok((task, command_data, tasks))
     }
 
-    pub fn generate_task_files(task_id: u32, tasks: Vec<Task>) -> Files {
+    pub fn generate_task_files(task_id: u32, tasks: &Vec<Task>) -> Files {
         let dir_str = format!(
             "{}/.multi-tasker/processes/{}",
             home::home_dir().unwrap().display(),
@@ -86,6 +94,17 @@ impl TaskManager {
             stdout,
             stderr
         }
+    }
+
+    pub fn parse_arg(arg: Option<String>) -> Result<u32, String> {
+        let task_id: u32 = match arg {
+            Some(arg) => match arg.parse::<u32>() {
+                Ok(id) => id,
+                Err(_) => return Err("Invalid id, see 'mult help' for more.".to_string())
+            },
+            None => return Err("Missing/invalid id, see 'mult help' for more.".to_string())
+        };
+        Ok(task_id)
     }
 }
 

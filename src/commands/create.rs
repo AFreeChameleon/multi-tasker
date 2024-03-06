@@ -19,7 +19,7 @@ pub fn run() -> Result<(), String> {
     }
     tasks.push(Task { id: new_task_id });
     println!("Running command...");
-    let files = TaskManager::generate_task_files(new_task_id, tasks);
+    let files = TaskManager::generate_task_files(new_task_id, &tasks);
     if cfg!(target_os = "linux") {
         #[cfg(target_os = "linux")]
         linux::daemonize_task(files, command);
