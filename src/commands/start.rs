@@ -18,7 +18,7 @@ pub fn run() -> Result<(), String> {
         };
         println!("Running process with id {}...", env::args().nth(idx).unwrap());
         #[cfg(target_os = "linux")]
-        linux::daemonize_task(files, command_data.command).unwrap();
+        linux::daemonize_task(files, command_data.command);
         println!("FINISHED");
 
         // TYGAYKUGFUE

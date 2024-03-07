@@ -1,17 +1,27 @@
 #![cfg(target_os = "linux")]
+use daemonize::Daemonize;
 use std::{
-    io::{BufRead, BufReader, ErrorKind}, os::fd::AsRawFd, path::Path, process::{ChildStderr, ChildStdout, Command, Stdio}, thread, time::{SystemTime, UNIX_EPOCH}
+    io::{BufRead, BufReader},
+    path::Path,
+    process::{Command, Stdio},
+    thread,
+    time::{SystemTime, UNIX_EPOCH},
 };
-use fork::{self, Fork};
 
 use crate::task::Files;
 use crate::command::{CommandData, CommandManager};
 
-pub fn daemonize_task(files: Files, command: String) -> Result<(), ErrorKind> {
-    if let Ok(Fork::Child) = fork::daemon(false, false) {
-       run_command(&command, &files.process_dir); 
-    }
-    Ok(())
+pub fn daemonize_task(files: Files, command: String) {
+    let daemonize = Daemonize::new()
+        .umask(0o112)
+        .stdout(files.stdout)
+        .stderr(files.stderr)
+        .privileged_action(|| "Executed before drop privileges");
+
+    match daemonize.start() {
+        Ok(_) => run_command(&command, &files.process_dir),
+        Err(e) => eprintln!("Error, {}", e)
+    };
 }
 
 fn run_command(command: &str, process_dir: &Path) {
@@ -31,18 +41,6 @@ fn run_command(command: &str, process_dir: &Path) {
     let stdout = child.stdout.take().expect("");
     let stderr = child.stderr.take().expect("");
 
-    unsafe { redirect_std_streams(stdout, stderr); }
-
-    child.wait().unwrap();
-}
-
-unsafe fn redirect_std_streams(stdout: ChildStdout, stderr: ChildStderr) {
-    // let dev_null = libc::open(b"/dev/null\0" as *const [u8; 10] as _, libc::O_RDWR);
-    let raw_stdout_fd = stdout.as_raw_fd();
-    let raw_stderr_fd = stderr.as_raw_fd();
-    libc::dup2(raw_stdout_fd, libc::STDOUT_FILENO);
-    libc::dup2(raw_stderr_fd , libc::STDERR_FILENO);
-    // libc::close(dev_null);
     thread::spawn(move || {
         let reader = BufReader::new(stdout);
 
@@ -66,5 +64,5 @@ unsafe fn redirect_std_streams(stdout: ChildStdout, stderr: ChildStderr) {
             eprintln!("{:}|{}", now, line.expect("Problem reading stderr.")); 
         }
     });
+    child.wait().unwrap();
 }
-

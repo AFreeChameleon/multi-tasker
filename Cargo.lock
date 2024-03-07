@@ -101,6 +101,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "daemonize"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab8bfdaacb3c887a54d41bdf48d3af8873b3f5566469f8ba21b92057509f116e"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "dirs-next"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -143,15 +152,6 @@ dependencies = [
  "libc",
  "redox_syscall",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "fork"
-version = "0.1.23"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60e74d3423998a57e9d906e49252fb79eb4a04d5cdfe188fb1b7ff9fc076a8ed"
-dependencies = [
- "libc",
 ]
 
 [[package]]
@@ -299,9 +299,8 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "colored",
- "fork",
+ "daemonize",
  "home",
- "libc",
  "notify",
  "prettytable",
  "serde",
