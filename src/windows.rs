@@ -79,7 +79,6 @@ pub fn daemonize_task(task_id: u32, command: &String) {
 
     let mut buffer: [u8; 4096] = [0; 4096];
     let mut overlapped = OVERLAPPED::default();
-    println!("Starttttttt {:?} {:?}", out_write_pipe, out_read_pipe);
 
     unsafe {
         spawn_logger(out_read_pipe);

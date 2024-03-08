@@ -32,7 +32,7 @@ pub fn run() -> Result<(), String> {
     let mut err_pos = fs::metadata(&err_file_path).unwrap().len();
 
     // Reading last 15 lines from stdout and stderr
-    let last_lines_to_print = 15;
+    let mut last_lines_to_print = 15;
     let mut combined_lines = read_last_lines(&out_file, last_lines_to_print)
         .unwrap();
     combined_lines.append(
@@ -44,6 +44,7 @@ pub fn run() -> Result<(), String> {
         Err(msg) => return Err(msg)
     };
     println!("Printing the last 15 lines of logs.");
+    last_lines_to_print = sorted_lines.len();
     for i in 0..last_lines_to_print {
         print!("{}", sorted_lines[i].content);
     }
@@ -120,7 +121,7 @@ fn sort_last_lines(
     lines: VecDeque<String>
 ) -> Result<Vec<Log>, String> {
     let vecdeque_lines: VecDeque<Log> = lines.iter().map(|line: &String| {
-        let (time_string, content) = line.split_once("|").expect("Logs missing time.");
+        let (time_string, content) = line.split_once("|").unwrap();
         Log {
             time_millis: time_string.parse::<u128>().expect("Log time not a valid integer."),
             content: content.to_string()
