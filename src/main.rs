@@ -4,7 +4,8 @@ mod commands;
 mod managers;
 
 #[cfg(target_os = "linux")]
-mod linux;
+mod platform_lib;
+
 #[cfg(target_os = "windows")]
 mod windows;
 
