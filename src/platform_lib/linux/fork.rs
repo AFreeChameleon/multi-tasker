@@ -55,8 +55,8 @@ fn run_command(command: &str, process_dir: &Path) {
     };
     CommandManager::write_command_data(data, process_dir);
 
-    let stdout = child.stdout.take().expect("");
-    let stderr = child.stderr.take().expect("");
+    let stdout = child.stdout.take().expect("Failed to take stdout.");
+    let stderr = child.stderr.take().expect("Failed to take stderr.");
     
     let mut stdout_file = File::create(process_dir.join("stdout.out"))
         .expect("Could not open stdout file.");

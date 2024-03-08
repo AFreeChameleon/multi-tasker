@@ -22,7 +22,6 @@ pub fn run() -> Result<(), String> {
     let files = TaskManager::generate_task_files(new_task_id, &tasks);
     if cfg!(target_os = "linux") {
         #[cfg(target_os = "linux")]
-        // linux::daemonize_task(files, command);
         match fork::run_daemon(files, command) {
             Ok(()) => (),
             Err(msg) => return Err(msg)
