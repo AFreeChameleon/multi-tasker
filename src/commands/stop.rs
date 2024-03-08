@@ -6,17 +6,16 @@ use crate::command::CommandManager;
 
 pub fn run() -> Result<(), String> {
     let tasks = TaskManager::get_tasks();
-    for idx in 2..env::args().len() {
-        let task_id: u32 = TaskManager::parse_arg(env::args().nth(idx)).unwrap();
-        let command_data = match CommandManager::read_command_data(task_id) {
-            Ok(data) => data,
-            Err(message) => return Err(message)
-        };
-        match kill_process(command_data.pid) {
-            Ok(_) => {},
-            Err(msg) => return Err(msg)
-        };
-    }
+    let task_id: u32 = TaskManager::parse_arg(env::args().nth(2)).unwrap();
+    let task = TaskManager::get_task(&tasks, task_id).unwrap();
+    let command_data = match CommandManager::read_command_data(task.id) {
+        Ok(data) => data,
+        Err(message) => return Err(message)
+    };
+    match kill_process(command_data.pid) {
+        Ok(_) => {},
+        Err(msg) => return Err(msg)
+    };
     Ok(())
 }
 
