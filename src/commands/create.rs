@@ -3,7 +3,7 @@ use std::env::args;
 use crate::task::{Task, TaskManager};
 
 #[cfg(target_os = "linux")]
-use crate::linux;
+use crate::platform_lib::linux::fork;
 #[cfg(target_os = "windows")]
 use crate::windows;
 
@@ -22,7 +22,11 @@ pub fn run() -> Result<(), String> {
     let files = TaskManager::generate_task_files(new_task_id, &tasks);
     if cfg!(target_os = "linux") {
         #[cfg(target_os = "linux")]
-        linux::daemonize_task(files, command);
+        // linux::daemonize_task(files, command);
+        match fork::run_daemon(files, command) {
+            Ok(()) => (),
+            Err(msg) => return Err(msg)
+        };
     } else if cfg!(target_os = "windows") {
         #[cfg(target_os = "windows")]
         // let batch_file_path = windows::generate_batch_file(new_task_id, &command).unwrap();

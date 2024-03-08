@@ -4,7 +4,7 @@ use crate::task::TaskManager;
 use crate::command::CommandManager;
 
 #[cfg(target_os = "linux")]
-use crate::linux;
+use crate::platform_lib::linux::fork;
 
 pub fn run() -> Result<(), String> {
     let tasks = TaskManager::get_tasks();
@@ -17,6 +17,9 @@ pub fn run() -> Result<(), String> {
     };
     println!("Running process with id {}...", env::args().nth(2).unwrap());
     #[cfg(target_os = "linux")]
-    linux::daemonize_task(files, command_data.command);
+    match fork::run_daemon(files, command_data.command) {
+        Ok(()) => (),
+        Err(msg) => return Err(msg)
+    };
     Ok(())
 }
