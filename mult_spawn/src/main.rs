@@ -1,39 +1,21 @@
-#![cfg(target_os = "windows")]
+#![windows_subsystem = "windows"]
 
 use std::{
-    os::windows::process::CommandExt,
-    fs::File,
-    io::{BufRead, BufReader, Write},
-    process::{Command, Stdio},
-    thread,
-    time::{SystemTime, UNIX_EPOCH}
+    env::args, fs::File, io::{BufRead, BufReader, Write}, os::windows::process::CommandExt, path::Path, process::{Command, Stdio}, thread, time::{SystemTime, UNIX_EPOCH}
 };
 
-use windows::Win32::System::Console::FreeConsole;
+use mult_lib::command::{CommandManager, CommandData};
 
-use crate::managers::task::Files;
-use crate::managers::command::{CommandManager, CommandData};
-
-pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
-    Command::new("cmd")
-        .args(&[
-              "/c",
-              "F:\\Dev\\Packages\\rust\\multi-tasker\\target\\debug\\mult_spawn.exe",
-              &files.process_dir.display().to_string(),
-              &command
-        ])
-        .spawn()
-        .expect("Spawning process has failed.");
-    return Ok(());
-    let process_dir = &files.process_dir;
-    let output_file = File::create("out.log").unwrap();
-    let stdout = Stdio::from(output_file.try_clone().unwrap());
-    let stderr = Stdio::from(output_file.try_clone().unwrap());
+// Usage: mult_spawn process_dir command
+fn main() -> Result<(), String> {
+    let dir_string = args().nth(1).unwrap();
+    let process_dir = Path::new(&dir_string);
+    let command = args().nth(2).unwrap();
     let mut child = Command::new("cmd")
         .creation_flags(0x08000000)
         .args(&["/c", &command])
-        .stdout(stdout)
-        .stderr(stderr)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
         .spawn()
         .expect("Command has failed.");
 
@@ -41,7 +23,7 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
         command,
         pid: child.id()
     };
-    CommandManager::write_command_data(data, &files.process_dir);
+    CommandManager::write_command_data(data, process_dir);
 
     let stdout = child.stdout.take().expect("Failed to take stdout.");
     let stderr = child.stderr.take().expect("Failed to take stderr.");
@@ -60,7 +42,7 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
                 .unwrap()
                 .as_millis();
             let formatted_line = format!(
-                "{:}|{}",
+                "{:}|{}\n",
                 now,
                 line.expect("Problem reading stdout.")
             ); 
@@ -78,7 +60,7 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
                 .unwrap()
                 .as_millis();
             let formatted_line = format!(
-                "{:}|{}",
+                "{:}|{}\n",
                 now,
                 line.expect("Problem reading stderr.")
             ); 
@@ -89,4 +71,3 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
     child.wait().unwrap();
     Ok(())
 }
-

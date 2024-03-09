@@ -1,3 +1,4 @@
+workspace = { members = [ "mult_lib", "mult_spawn"] }
 [package]
 name = "mult"
 version = "0.1.0"
@@ -14,6 +15,7 @@ colored = "2.1.0"
 prettytable = "0.10.0"
 notify = "6.1.1"
 term = "0.7"
+mult_lib = { path = "./mult_lib" }
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.53.0", features = [

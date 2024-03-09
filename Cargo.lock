@@ -292,12 +292,34 @@ dependencies = [
  "colored",
  "home",
  "libc",
+ "mult_lib",
  "notify",
  "prettytable",
  "serde",
  "sysinfo",
  "term",
  "windows 0.53.0",
+]
+
+[[package]]
+name = "mult_lib"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "colored",
+ "home",
+ "notify",
+ "prettytable",
+ "serde",
+ "sysinfo",
+ "term",
+]
+
+[[package]]
+name = "mult_spawn"
+version = "0.1.0"
+dependencies = [
+ "mult_lib",
 ]
 
 [[package]]
