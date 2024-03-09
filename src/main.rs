@@ -3,7 +3,6 @@ use std::env::args;
 mod commands;
 mod managers;
 
-#[cfg(target_os = "linux")]
 mod platform_lib;
 
 #[cfg(target_os = "windows")]

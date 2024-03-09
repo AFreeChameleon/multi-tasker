@@ -1,60 +1,37 @@
-#![cfg(target_os = "linux")]
+#![cfg(target_os = "windows")]
+
 use std::{
-    ffi::CString, fs::File, io::{BufRead, BufReader, Write}, path::Path, process::{Command, Stdio}, thread, time::{SystemTime, UNIX_EPOCH}
+    os::windows::process::CommandExt,
+    fs::File,
+    io::{BufRead, BufReader, Write},
+    process::{Command, Stdio},
+    thread,
+    time::{SystemTime, UNIX_EPOCH}
 };
 
-use libc::c_char;
+use windows::Win32::System::Console::FreeConsole;
+
 use crate::managers::task::Files;
 use crate::managers::command::{CommandManager, CommandData};
 
 pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
-    let process_id;
-    let sid;
-    unsafe {
-        process_id = libc::fork();
-    }
-    // Fork failed
-    if process_id < 0 {
-        println!("Fork failed");
-        return Err("Fork failed".to_string())
-    }
-    // Parent process - need to kill it
-    if process_id > 0 {
-        println!("Process id of child process {}", process_id);
-        return Ok(())
-    }
-    unsafe {
-        libc::umask(0);
-        sid = libc::setsid();
-    }
-    if sid < 0 {
-        return Err("Setting sid failed".to_string())
-    }
-    unsafe {
-        let c_str = CString::new("/").unwrap();
-        libc::chdir(c_str.as_ptr() as *const c_char);
-        libc::close(libc::STDIN_FILENO);
-        libc::close(libc::STDOUT_FILENO);
-        libc::close(libc::STDERR_FILENO);
-    }
-    // Do daemon stuff here
-    run_command(&command, &files.process_dir);
-    Ok(())
-}
-
-fn run_command(command: &str, process_dir: &Path) {
-    let mut child = Command::new("sh")
-        .args(&["-c", &command])
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+    let process_dir = &files.process_dir;
+    let output_file = File::create("out.log").unwrap();
+    let stdout = Stdio::from(output_file.try_clone().unwrap());
+    let stderr = Stdio::from(output_file.try_clone().unwrap());
+    let mut child = Command::new("cmd")
+        .creation_flags(0x08000000)
+        .args(&["/c", &command])
+        .stdout(stdout)
+        .stderr(stderr)
         .spawn()
         .expect("Command has failed.");
 
     let data = CommandData {
-        command: command.to_string(),
+        command,
         pid: child.id()
     };
-    CommandManager::write_command_data(data, process_dir);
+    CommandManager::write_command_data(data, &files.process_dir);
 
     let stdout = child.stdout.take().expect("Failed to take stdout.");
     let stderr = child.stderr.take().expect("Failed to take stderr.");
@@ -100,4 +77,6 @@ fn run_command(command: &str, process_dir: &Path) {
         }
     });
     child.wait().unwrap();
+    Ok(())
 }
+

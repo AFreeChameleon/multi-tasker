@@ -5,7 +5,7 @@ use crate::task::{Task, TaskManager};
 #[cfg(target_os = "linux")]
 use crate::platform_lib::linux::fork;
 #[cfg(target_os = "windows")]
-use crate::windows;
+use crate::platform_lib::windows::fork;
 
 pub fn run() -> Result<(), String> {
     let command = match args().nth(2) {
@@ -28,8 +28,10 @@ pub fn run() -> Result<(), String> {
         };
     } else if cfg!(target_os = "windows") {
         #[cfg(target_os = "windows")]
-        // let batch_file_path = windows::generate_batch_file(new_task_id, &command).unwrap();
-        windows::daemonize_task(new_task_id, &command);
+        match fork::run_daemon(files, command) {
+            Ok(()) => (),
+            Err(msg) => return Err(msg)
+        };
     } else {
         println!("Linux is only supported at the moment");
     }
