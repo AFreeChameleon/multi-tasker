@@ -1,15 +1,8 @@
 use std::env::args;
+use commands::{create, delete, ls, start, stop, logs, help};
 
 mod commands;
-mod managers;
-
 mod platform_lib;
-
-#[cfg(target_os = "windows")]
-mod windows;
-
-use commands::{create, delete, ls, start, stop, logs, help};
-use managers::{task, command, table};
 
 fn main() {
     if let Some(mode) = args().nth(1) {

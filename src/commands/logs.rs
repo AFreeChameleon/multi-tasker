@@ -7,7 +7,7 @@ use std::{
     collections::VecDeque
 };
 
-use crate::task::TaskManager;
+use mult_lib::task::TaskManager;
 
 pub fn run() -> Result<(), String> {
     let (task, _, _) = match TaskManager::get_task_from_arg(2) {

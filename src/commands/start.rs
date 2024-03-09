@@ -1,7 +1,7 @@
 use std::env;
 
-use crate::task::TaskManager;
-use crate::command::CommandManager;
+use mult_lib::task::TaskManager;
+use mult_lib::command::CommandManager;
 
 #[cfg(target_os = "linux")]
 use crate::platform_lib::linux::fork;

@@ -4,8 +4,8 @@ use std::{
 };
 
 use libc::c_char;
-use crate::managers::task::Files;
-use crate::managers::command::{CommandManager, CommandData};
+use mult_lib::managers::task::Files;
+use mult_lib::managers::command::{CommandManager, CommandData};
 
 pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
     let process_id;

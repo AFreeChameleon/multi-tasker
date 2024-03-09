@@ -1,7 +1,7 @@
 use std::{env, fs};
 
-use crate::managers::command::CommandManager;
-use crate::task::TaskManager;
+use mult_lib::command::CommandManager;
+use mult_lib::task::TaskManager;
 use crate::stop::kill_process;
 
 pub fn run() -> Result<(), String> {

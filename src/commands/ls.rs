@@ -2,9 +2,9 @@ use std::{env, thread, time::Duration};
 use prettytable::Table;
 use sysinfo::{System, Pid};
 
-use crate::table::{MainHeaders, ProcessHeaders, TableManager};
-use crate::task::{Task, TaskManager};
-use crate::command::CommandManager;
+use mult_lib::table::{MainHeaders, ProcessHeaders, TableManager};
+use mult_lib::task::{Task, TaskManager};
+use mult_lib::command::CommandManager;
 
 pub fn run() -> Result<(), String> {
     let mut table = TableManager {

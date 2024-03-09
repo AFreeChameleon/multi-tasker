@@ -1,8 +1,8 @@
 use std::env;
 use sysinfo::{Pid, System};
 
-use crate::task::TaskManager;
-use crate::command::CommandManager;
+use mult_lib::task::TaskManager;
+use mult_lib::command::CommandManager;
 
 pub fn run() -> Result<(), String> {
     let tasks = TaskManager::get_tasks();
