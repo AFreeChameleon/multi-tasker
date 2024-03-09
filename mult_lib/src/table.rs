@@ -1,7 +1,4 @@
-use std::{io::stdout, thread::{self, sleep}, time::Duration};
-
 use prettytable::{Table, Cell, Row, format};
-use sysinfo::Process;
 
 pub struct MainHeaders {
     pub id: u32,
