@@ -1,7 +1,14 @@
 #![windows_subsystem = "windows"]
 
 use std::{
-    env::args, fs::File, io::{BufRead, BufReader, Write}, os::windows::process::CommandExt, path::Path, process::{Command, Stdio}, thread, time::{SystemTime, UNIX_EPOCH}
+    thread,
+    env::args,
+    fs::File,
+    io::{BufRead, BufReader, Write},
+    os::windows::process::CommandExt,
+    path::Path,
+    process::{Command, Stdio},
+    time::{SystemTime, UNIX_EPOCH}
 };
 
 use mult_lib::command::{CommandManager, CommandData};
