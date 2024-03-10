@@ -5,3 +5,4 @@ pub mod stop;
 pub mod delete;
 pub mod logs;
 pub mod help;
+pub mod restart;

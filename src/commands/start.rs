@@ -1,7 +1,7 @@
 use std::env;
 
-use mult_lib::task::TaskManager;
-use mult_lib::command::CommandManager;
+use mult_lib::task::{TaskManager, Files};
+use mult_lib::command::{CommandData, CommandManager};
 
 #[cfg(target_os = "linux")]
 use crate::platform_lib::linux::fork;
@@ -19,6 +19,13 @@ pub fn run() -> Result<(), String> {
         Err(message) => return Err(message)
     };
     println!("Running process with id {}...", env::args().nth(2).unwrap());
+    match start_process(files, command_data) {
+        Ok(()) => return Ok(()),
+        Err(msg) => return Err(msg)
+    }
+}
+
+pub fn start_process(files: Files, command_data: CommandData) -> Result<(), String> {
     if cfg!(target_os = "linux") {
         #[cfg(target_os = "linux")]
         match fork::run_daemon(files, command_data.command) {

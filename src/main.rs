@@ -1,5 +1,5 @@
 use std::env::args;
-use commands::{create, delete, ls, start, stop, logs, help};
+use commands::{create, delete, ls, start, stop, logs, help, restart};
 
 mod commands;
 mod platform_lib;
@@ -8,15 +8,19 @@ fn main() {
     if let Some(mode) = args().nth(1) {
         match mode.as_str() {
             "create" => match create::run() {
-                Ok(()) => println!("Command finished."),
+                Ok(()) => println!("Command started."),
                 Err(message) => println!("{}", message)
             },
             "start" => match start::run() {
-                Ok(()) => println!("Process finished."),
+                Ok(()) => println!("Process started."),
                 Err(message) => println!("{}", message)
             },
             "stop" => match stop::run() {
                 Ok(()) => println!("Process stopped."),
+                Err(message) => println!("{}", message)
+            },
+            "restart" => match restart::run() {
+                Ok(()) => println!("Process restarted."),
                 Err(message) => println!("{}", message)
             },
             "logs" => match logs::run() {
