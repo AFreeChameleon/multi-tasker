@@ -13,7 +13,7 @@ pub fn run() -> Result<(), String> {
         None => return Err("Missing command, see 'mult help' for more.".to_string())
     };
     let mut new_task_id = 0;
-    let mut tasks: Vec<Task> = TaskManager::get_tasks();
+    let mut tasks: Vec<Task> = TaskManager::get_tasks()?;
     if let Some(last_task) = tasks.last() {
         new_task_id = last_task.id + 1;
     }

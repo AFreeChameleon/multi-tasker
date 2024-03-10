@@ -55,7 +55,7 @@ fn listen() -> Result<(), String>{
 }
 
 pub fn setup_table(table: &mut TableManager) -> Result<(), String> {
-    let tasks: Vec<Task> = TaskManager::get_tasks();
+    let tasks: Vec<Task> = TaskManager::get_tasks()?;
     for task in tasks.iter() {
         let command = match CommandManager::read_command_data(task.id) {
             Ok(result) => result,

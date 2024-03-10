@@ -5,7 +5,7 @@ use mult_lib::task::TaskManager;
 use mult_lib::command::CommandManager;
 
 pub fn run() -> Result<(), String> {
-    let tasks = TaskManager::get_tasks();
+    let tasks = TaskManager::get_tasks()?;
     let task_id: u32 = TaskManager::parse_arg(env::args().nth(2))?;
     let task = TaskManager::get_task(&tasks, task_id).unwrap();
     let command_data = CommandManager::read_command_data(task.id)?;

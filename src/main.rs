@@ -1,5 +1,5 @@
 use std::env::args;
-use commands::{create, delete, ls, start, stop, logs, help, restart};
+use commands::{create, delete, ls, start, stop, logs, help, restart, health};
 
 mod commands;
 mod platform_lib;
@@ -17,6 +17,7 @@ fn main() {
             "delete" => delete::run(),
             "help" => help::run(),
             "ls" => ls::run(),
+            "health" => health::run(),
             _ => Err("Command not found.".to_string())
         } {
             println!("{message}");

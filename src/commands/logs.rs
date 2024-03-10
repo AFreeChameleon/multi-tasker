@@ -11,7 +11,7 @@ use std::{
 use mult_lib::task::TaskManager;
 
 pub fn run() -> Result<(), String> {
-    let tasks = TaskManager::get_tasks();
+    let tasks = TaskManager::get_tasks()?;
     let task_id: u32 = TaskManager::parse_arg(env::args().nth(2))?;
     let task = TaskManager::get_task(&tasks, task_id)?;
 

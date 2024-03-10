@@ -8,7 +8,7 @@ use crate::stop::kill_process;
 use super::start::start_process;
 
 pub fn run() -> Result<(), String> {
-    let tasks = TaskManager::get_tasks();
+    let tasks = TaskManager::get_tasks()?;
     let task_id: u32 = TaskManager::parse_arg(env::args().nth(2))?;
     let task = TaskManager::get_task(&tasks, task_id)?;
     let command_data = CommandManager::read_command_data(task.id)?;

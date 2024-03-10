@@ -10,7 +10,7 @@ use crate::platform_lib::linux::fork;
 use crate::platform_lib::windows::fork;
 
 pub fn run() -> Result<(), String> {
-    let tasks = TaskManager::get_tasks();
+    let tasks = TaskManager::get_tasks()?;
     let task_id: u32 = TaskManager::parse_arg(env::args().nth(2))?;
     let task = TaskManager::get_task(&tasks, task_id)?;
     let files = TaskManager::generate_task_files(task.id, &tasks);
