@@ -1,12 +1,13 @@
 use std::io::Error;
 use std::fs;
 use std::path::Path;
-use colored::Colorize;
+use colored::{control, Colorize};
 
 use mult_lib::task::{TaskManager, Files};
 use mult_lib::command::{CommandData, CommandManager};
 
 pub fn run() -> Result<(), String> {
+    control::set_virtual_terminal(true).unwrap();
     println!("Running tests...");
     // Initial checks
     let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
@@ -24,7 +25,7 @@ pub fn run() -> Result<(), String> {
     // Checking for processes while no task file exists
     if !tasks_dir.join("tasks.bin").exists() {
         for name in processes {
-            println!("{} is not a task, found in processes.", name.red().bold());
+            println!("{} is not a task, found in processes.", name.red());
         }
         return Ok(())
     }
@@ -33,7 +34,7 @@ pub fn run() -> Result<(), String> {
     for task in tasks.iter() {
         match TaskManager::test_task_files(task.id) {
             Ok(()) => (),
-            Err(msg) => println!("{}", msg.red().bold())
+            Err(msg) => println!("{}", msg.red())
         };
     }
     println!("Tests finished.");
@@ -47,7 +48,7 @@ fn check_processes_dir(processes_dir: &Path) -> Result<Vec<String>, Error> {
         for entry in entries {
             let entry = entry?;
             let Ok(file_name) = entry.file_name().into_string() else {
-                println!("Failed converting file name from processes dirrectory.");
+                println!("Failed converting file name from processes directory.");
                 continue;
             };
             name_entries.push(file_name);

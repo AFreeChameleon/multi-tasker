@@ -35,7 +35,7 @@ impl TaskManager {
         }
         for file in PROCESS_FILES.iter() {
             if tasks_dir.join(file).exists() {
-                return Err(format!("Could new get {}", file).to_string())
+                return Err(format!("Could new get {}", file.red()).to_string())
             }
         }
         Ok(())
