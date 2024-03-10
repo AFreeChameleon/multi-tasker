@@ -32,6 +32,7 @@ pub fn run() -> Result<(), String> {
     } else {
         println!("Linux is only supported at the moment");
     }
+    println!("Process created.");
     Ok(())
 }
 

@@ -22,5 +22,6 @@ pub fn run() -> Result<(), String> {
         Err(msg) => return Err(format!("{:?}", msg))
     };
     TaskManager::write_tasks_file(&new_tasks);
+    println!("Process deleted.");
     Ok(())
 }

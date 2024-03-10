@@ -10,6 +10,7 @@ pub fn run() -> Result<(), String> {
     let task = TaskManager::get_task(&tasks, task_id).unwrap();
     let command_data = CommandManager::read_command_data(task.id)?;
     kill_process(command_data.pid)?;
+    println!("Process stopped.");
     Ok(())
 }
 

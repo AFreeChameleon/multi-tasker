@@ -20,6 +20,7 @@ pub fn run() -> Result<(), String> {
         Ok(_) => {},
         Err(msg) => return Err(msg)
     };
+    println!("Process restarted.");
     Ok(())
 }
 

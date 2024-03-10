@@ -8,41 +8,19 @@ const NO_MODE_TEXT: &str = "No mode given, usage: mult [start|stop|ls] [command|
 For a full list of commands: mult help";
 fn main() {
     if let Some(mode) = args().nth(1) {
-        match mode.as_str() {
-            "create" => match create::run() {
-                Ok(()) => println!("Process created."),
-                Err(message) => println!("{}", message)
-            },
-            "start" => match start::run() {
-                Ok(()) => println!("Process started."),
-                Err(message) => println!("{}", message)
-            },
-            "stop" => match stop::run() {
-                Ok(()) => println!("Process stopped."),
-                Err(message) => println!("{}", message)
-            },
-            "restart" => match restart::run() {
-                Ok(()) => println!("Process restarted."),
-                Err(message) => println!("{}", message)
-            },
-            "logs" => match logs::run() {
-                Ok(()) => println!("Logs stopped."),
-                Err(message) => println!("{}", message)
-            },
-            "delete" => match delete::run() {
-                Ok(()) => println!("Process deleted."),
-                Err(message) => println!("{}", message)
-            },
-            "help" => match help::run() {
-                Ok(()) => (),
-                Err(message) => println!("{}", message)
-            },
-            "ls" => match ls::run() {
-                Ok(()) => (),
-                Err(message) => println!("{}", message)
-            },
-            _ => println!("Command not found.")
-        };
+        if let Err(message) = match mode.as_str() {
+            "create" => create::run(),
+            "start" => start::run(),
+            "stop" => stop::run(),
+            "restart" => restart::run(),
+            "logs" => logs::run(),
+            "delete" => delete::run(),
+            "help" => help::run(),
+            "ls" => ls::run(),
+            _ => Err("Command not found.".to_string())
+        } {
+            println!("{message}");
+        }
     } else {
         println!("{NO_MODE_TEXT}");
     }

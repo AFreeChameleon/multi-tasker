@@ -82,6 +82,7 @@ pub fn run() -> Result<(), String> {
         }
     }
 
+    println!("Logs stopped.");
     Ok(())
 }
 

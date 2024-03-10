@@ -6,3 +6,4 @@ pub mod delete;
 pub mod logs;
 pub mod help;
 pub mod restart;
+pub mod health;

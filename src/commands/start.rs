@@ -15,8 +15,12 @@ pub fn run() -> Result<(), String> {
     let task = TaskManager::get_task(&tasks, task_id)?;
     let files = TaskManager::generate_task_files(task.id, &tasks);
     let command_data = CommandManager::read_command_data(task.id)?;
+    let current_dir = env::current_dir().unwrap();
     println!("Running process with id {}...", env::args().nth(2).unwrap());
+    env::set_current_dir(&command_data.dir).unwrap();
     start_process(files, command_data)?;
+    env::set_current_dir(&current_dir).unwrap();
+    println!("Process started.");
     Ok(())
 }
 

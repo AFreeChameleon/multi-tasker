@@ -2,7 +2,7 @@
 
 use std::{
     thread,
-    env::args,
+    env,
     fs::File,
     io::{BufRead, BufReader, Write},
     os::windows::process::CommandExt,
@@ -10,14 +10,15 @@ use std::{
     process::{Command, Stdio},
     time::{SystemTime, UNIX_EPOCH}
 };
+use home::home_dir;
 
 use mult_lib::command::{CommandManager, CommandData};
 
 // Usage: mult_spawn process_dir command
 fn main() -> Result<(), String> {
-    let dir_string = args().nth(1).unwrap();
+    let dir_string = env::args().nth(1).unwrap();
     let process_dir = Path::new(&dir_string);
-    let command = args().nth(2).unwrap();
+    let command = env::args().nth(2).unwrap();
     let mut child = Command::new("cmd")
         .creation_flags(0x08000000)
         .args(&["/c", &command])
@@ -26,9 +27,15 @@ fn main() -> Result<(), String> {
         .spawn()
         .expect("Command has failed.");
 
+    let current_dir = match env::current_dir() {
+        Ok(val) => val,
+        Err(_) => home_dir().unwrap()
+    };
+
     let data = CommandData {
         command,
-        pid: child.id()
+        pid: child.id(),
+        dir: current_dir.display().to_string()
     };
     CommandManager::write_command_data(data, process_dir);
 

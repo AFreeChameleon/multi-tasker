@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 mult_lib = { path = "../mult_lib" }
+home = "0.5.9"

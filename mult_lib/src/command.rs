@@ -8,7 +8,8 @@ use bincode;
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct CommandData {
     pub command: String,
-    pub pid: u32
+    pub pid: u32,
+    pub dir: String
 }
 
 pub struct CommandManager {}
