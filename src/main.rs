@@ -4,11 +4,13 @@ use commands::{create, delete, ls, start, stop, logs, help, restart};
 mod commands;
 mod platform_lib;
 
+const NO_MODE_TEXT: &str = "No mode given, usage: mult [start|stop|ls] [command|task id]\n
+For a full list of commands: mult help";
 fn main() {
     if let Some(mode) = args().nth(1) {
         match mode.as_str() {
             "create" => match create::run() {
-                Ok(()) => println!("Command started."),
+                Ok(()) => println!("Process created."),
                 Err(message) => println!("{}", message)
             },
             "start" => match start::run() {
@@ -39,13 +41,10 @@ fn main() {
                 Ok(()) => (),
                 Err(message) => println!("{}", message)
             },
-            _ => println!("Command not start|stop|ls")
+            _ => println!("Command not found.")
         };
     } else {
-        println!("
-            No mode given, usage: mult [start|stop|ls] [command|task id]\n
-            For a full list of commands: mult help
-        ");
+        println!("{NO_MODE_TEXT}");
     }
 }
 

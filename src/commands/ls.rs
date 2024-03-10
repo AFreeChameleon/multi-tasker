@@ -13,19 +13,18 @@ pub fn run() -> Result<(), String> {
     };
     table.create_headers();
     setup_table(&mut table).unwrap();
-    
-    match env::args().nth(2) {
-        Some(val) => {
-            if val == "--listen" {
-                listen().unwrap();
-                return Ok(());
+    if let Some(new_arg) = env::args().nth(2) {
+        if new_arg == "--listen" {
+            if cfg!(target_os = "windows") {
+                return Err("Windows does not support --listen".to_string());
             }
-            println!("Invalid argument.");
-        },
-        None => {
-            table.print();
+            listen()?;
+        } else {
+            return Err(format!("Invalid argument {new_arg}."))
         }
-    };
+    } else {
+        table.print();
+    }
 
     Ok(())
 }
@@ -36,7 +35,7 @@ fn listen() -> Result<(), String>{
         table_data: Vec::new()
     };
     table.create_headers();
-    setup_table(&mut table).unwrap();
+    setup_table(&mut table)?;
     let mut height = table.print();
     let mut terminal = term::stdout().unwrap();
     loop {
@@ -46,7 +45,7 @@ fn listen() -> Result<(), String>{
             table_data: Vec::new()
         };
         table.create_headers();
-        setup_table(&mut table).unwrap();
+        setup_table(&mut table)?;
         for _ in 0..height {
             terminal.cursor_up().unwrap();
             terminal.delete_line().unwrap();

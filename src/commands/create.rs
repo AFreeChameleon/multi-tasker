@@ -28,10 +28,7 @@ pub fn run() -> Result<(), String> {
         };
     } else if cfg!(target_os = "windows") {
         #[cfg(target_os = "windows")]
-        match fork::run_daemon(files, command) {
-            Ok(()) => (),
-            Err(msg) => return Err(msg)
-        };
+        fork::run_daemon(files, command)?;
     } else {
         println!("Linux is only supported at the moment");
     }
