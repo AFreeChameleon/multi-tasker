@@ -31,11 +31,11 @@ impl TaskManager {
         let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
         let tasks_dir = Path::new(&tasks_dir_str).join(id.to_string());
         if tasks_dir.exists() {
-            return Err("Could not get task directory.".to_string())
+            return Err(format!("Could not get task directory {}.", id.to_string()))
         }
         for file in PROCESS_FILES.iter() {
             if tasks_dir.join(file).exists() {
-                return Err(format!("Could new get {}", file.red()).to_string())
+                println!("Could not get {}", file.red());
             }
         }
         Ok(())

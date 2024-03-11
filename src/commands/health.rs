@@ -8,36 +8,48 @@ use mult_lib::command::{CommandData, CommandManager};
 
 pub fn run() -> Result<(), String> {
     control::set_virtual_terminal(true).unwrap();
-    println!("Running tests...");
+    println!("Running health check...");
+    match run_tests() {
+        Ok(()) => println!("No failures detected."),
+        Err(None) => (),
+        Err(Some(msg)) => println!("{msg}")
+    };
+    println!("Health check finished.");
+    Ok(())
+}
+
+fn run_tests() -> Result<(), Option<String>> {
     // Initial checks
     let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
     let tasks_dir = Path::new(&tasks_dir_str);
     if !tasks_dir.exists() {
-        println!("Main directory doesn't exist.");
-        return Ok(())
+        return Err(Some("Main directory doesn't exist.".to_string()))
     }
     // Check tasks file exists
     let processes_dir = tasks_dir.join("processes");
     let Ok(processes) = check_processes_dir(&processes_dir) else {
-        println!("Failed reading process dir.");
-        return Ok(())
+        return Err(Some("Failed reading process dir.".to_string()));
     };
     // Checking for processes while no task file exists
     if !tasks_dir.join("tasks.bin").exists() {
         for name in processes {
             println!("{} is not a task, found in processes.", name.red());
         }
-        return Ok(())
+        return Err(None)
     }
-    let tasks = TaskManager::get_tasks()?;
+    let tasks = match TaskManager::get_tasks() {
+        Ok(val) => val,
+        Err(msg) => {
+            return Err(Some(format!("{msg}")));
+        }
+    };
     // Check process dir, log files & data binary
     for task in tasks.iter() {
         match TaskManager::test_task_files(task.id) {
             Ok(()) => (),
-            Err(msg) => println!("{}", msg.red())
+            Err(msg) => println!("{msg}") 
         };
     }
-    println!("Tests finished.");
     Ok(())
 }
 
