@@ -1,5 +1,6 @@
 use notify::{RecursiveMode, Watcher};
 use std::{
+    env,
     fs::{self, File},
     path::Path,
     io::{Seek, SeekFrom, BufReader, BufRead},
@@ -7,13 +8,12 @@ use std::{
     collections::VecDeque
 };
 
-use crate::task::TaskManager;
+use mult_lib::task::TaskManager;
 
 pub fn run() -> Result<(), String> {
-    let (task, _, _) = match TaskManager::get_task_from_arg(2) {
-        Ok(val) => val,
-        Err(msg) => return Err(msg)
-    };
+    let tasks = TaskManager::get_tasks()?;
+    let task_id: u32 = TaskManager::parse_arg(env::args().nth(2))?;
+    let task = TaskManager::get_task(&tasks, task_id)?;
 
     let file_path = format!(
         "{}/.multi-tasker/processes/{}",
@@ -33,16 +33,12 @@ pub fn run() -> Result<(), String> {
 
     // Reading last 15 lines from stdout and stderr
     let mut last_lines_to_print = 15;
-    let mut combined_lines = read_last_lines(&out_file, last_lines_to_print)
-        .unwrap();
+    let mut combined_lines = read_last_lines(&out_file, last_lines_to_print)?;
     combined_lines.append(
         &mut read_last_lines(&err_file, last_lines_to_print).unwrap()
     );
     // Sorting lines by time
-    let sorted_lines = match sort_last_lines(combined_lines) {
-        Ok(lines) => lines,
-        Err(msg) => return Err(msg)
-    };
+    let sorted_lines = sort_last_lines(combined_lines)?;
     println!("Printing the last 15 lines of logs.");
     last_lines_to_print = sorted_lines.len();
     for i in 0..last_lines_to_print {
@@ -86,6 +82,7 @@ pub fn run() -> Result<(), String> {
         }
     }
 
+    println!("Logs stopped.");
     Ok(())
 }
 

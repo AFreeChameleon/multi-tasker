@@ -1,48 +1,28 @@
-#![cfg(target_os = "linux")]
+#![windows_subsystem = "windows"]
+#![cfg(target_os = "windows")]
+
 use std::{
-    env, fs::File, io::{BufRead, BufReader, Write}, path::Path, process::{Command, Stdio}, thread, time::{SystemTime, UNIX_EPOCH}
+    thread,
+    env,
+    fs::File,
+    io::{BufRead, BufReader, Write},
+    os::windows::process::CommandExt,
+    path::Path,
+    process::{Command, Stdio},
+    time::{SystemTime, UNIX_EPOCH}
 };
 use home::home_dir;
 
-use mult_lib::task::Files;
 use mult_lib::command::{CommandManager, CommandData};
 
-pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
-    let process_id;
-    let sid;
-    unsafe {
-        process_id = libc::fork();
-    }
-    // Fork failed
-    if process_id < 0 {
-        println!("Fork failed");
-        return Err("Fork failed".to_string())
-    }
-    // Parent process - need to kill it
-    if process_id > 0 {
-        println!("Process id of child process {}", process_id);
-        return Ok(())
-    }
-    unsafe {
-        libc::umask(0);
-        sid = libc::setsid();
-    }
-    if sid < 0 {
-        return Err("Setting sid failed".to_string())
-    }
-    unsafe {
-        libc::close(libc::STDIN_FILENO);
-        libc::close(libc::STDOUT_FILENO);
-        libc::close(libc::STDERR_FILENO);
-    }
-    // Do daemon stuff here
-    run_command(&command, &files.process_dir);
-    Ok(())
-}
-
-fn run_command(command: &str, process_dir: &Path) {
-    let mut child = Command::new("sh")
-        .args(&["-c", &command])
+// Usage: mult_spawn process_dir command
+fn main() -> Result<(), String> {
+    let dir_string = env::args().nth(1).unwrap();
+    let process_dir = Path::new(&dir_string);
+    let command = env::args().nth(2).unwrap();
+    let mut child = Command::new("cmd")
+        .creation_flags(0x08000000)
+        .args(&["/c", &command])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
@@ -54,7 +34,7 @@ fn run_command(command: &str, process_dir: &Path) {
     };
 
     let data = CommandData {
-        command: command.to_string(),
+        command,
         pid: child.id(),
         dir: current_dir.display().to_string()
     };
@@ -77,7 +57,7 @@ fn run_command(command: &str, process_dir: &Path) {
                 .unwrap()
                 .as_millis();
             let formatted_line = format!(
-                "{:}|{}",
+                "{:}|{}\n",
                 now,
                 line.expect("Problem reading stdout.")
             ); 
@@ -95,7 +75,7 @@ fn run_command(command: &str, process_dir: &Path) {
                 .unwrap()
                 .as_millis();
             let formatted_line = format!(
-                "{:}|{}",
+                "{:}|{}\n",
                 now,
                 line.expect("Problem reading stderr.")
             ); 
@@ -104,4 +84,5 @@ fn run_command(command: &str, process_dir: &Path) {
         }
     });
     child.wait().unwrap();
+    Ok(())
 }

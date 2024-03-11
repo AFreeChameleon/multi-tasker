@@ -7,8 +7,11 @@ use std::{
 
 use bincode;
 use home;
+use colored::Colorize;
 
 use crate::command::{CommandData, CommandManager};
+
+const PROCESS_FILES: [&str; 3] = ["stdout.out", "stderr.err", "data.bin"];
 
 pub struct Files {
     pub process_dir: Box<Path>,
@@ -24,15 +27,32 @@ pub struct Task {
 pub struct TaskManager {}
 
 impl TaskManager {
-    pub fn get_tasks() -> Vec<Task> {
+    pub fn test_task_files(id: u32) -> Result<(), String> {
+        let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
+        let tasks_dir = Path::new(&tasks_dir_str).join(id.to_string());
+        if tasks_dir.exists() {
+            return Err(format!("Could not get task directory {}.", id.to_string()))
+        }
+        for file in PROCESS_FILES.iter() {
+            if tasks_dir.join(file).exists() {
+                println!("Could not get {}", file.red());
+            }
+        }
+        Ok(())
+    }
+    
+    pub fn get_tasks() -> Result<Vec<Task>, String> {
         let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
         let tasks_file = Path::new(&tasks_dir_str).join("tasks.bin");
         if tasks_file.exists() {
             let tasks_encoded: Vec<u8> = fs::read(tasks_file).unwrap(); 
-            let tasks_decoded: Vec<Task> = bincode::deserialize(&tasks_encoded[..]).unwrap();
-            return tasks_decoded;
+            let tasks_decoded: Vec<Task> = match bincode::deserialize(&tasks_encoded[..]) {
+                Ok(val) => val,
+                Err(_) => return Err("Failed to read from tasks file.".to_string())
+            };
+            return Ok(tasks_decoded);
         }
-        Vec::new()
+        Ok(Vec::new())
     }
 
     pub fn get_task(tasks: &Vec<Task>, id: u32) -> Result<Task, String> {
@@ -52,7 +72,7 @@ impl TaskManager {
     }
 
     pub fn get_task_from_arg(nth_arg: usize) -> Result<(Task, CommandData, Vec<Task>), String> {
-        let tasks: Vec<Task> = TaskManager::get_tasks();
+        let tasks: Vec<Task> = TaskManager::get_tasks()?;
         let task_id: u32 = match args().nth(nth_arg) {
             Some(arg) => match arg.parse::<u32>() {
                 Ok(id) => id,

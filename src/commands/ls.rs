@@ -2,9 +2,9 @@ use std::{env, thread, time::Duration};
 use prettytable::Table;
 use sysinfo::{System, Pid};
 
-use crate::table::{MainHeaders, ProcessHeaders, TableManager};
-use crate::task::{Task, TaskManager};
-use crate::command::CommandManager;
+use mult_lib::table::{MainHeaders, ProcessHeaders, TableManager};
+use mult_lib::task::{Task, TaskManager};
+use mult_lib::command::CommandManager;
 
 pub fn run() -> Result<(), String> {
     let mut table = TableManager {
@@ -13,19 +13,18 @@ pub fn run() -> Result<(), String> {
     };
     table.create_headers();
     setup_table(&mut table).unwrap();
-    
-    match env::args().nth(2) {
-        Some(val) => {
-            if val == "--listen" {
-                listen().unwrap();
-                return Ok(());
+    if let Some(new_arg) = env::args().nth(2) {
+        if new_arg == "--listen" {
+            if cfg!(target_os = "windows") {
+                return Err("Windows does not support --listen".to_string());
             }
-            println!("Invalid argument.");
-        },
-        None => {
-            table.print();
+            listen()?;
+        } else {
+            return Err(format!("Invalid argument {new_arg}."))
         }
-    };
+    } else {
+        table.print();
+    }
 
     Ok(())
 }
@@ -36,7 +35,7 @@ fn listen() -> Result<(), String>{
         table_data: Vec::new()
     };
     table.create_headers();
-    setup_table(&mut table).unwrap();
+    setup_table(&mut table)?;
     let mut height = table.print();
     let mut terminal = term::stdout().unwrap();
     loop {
@@ -46,7 +45,7 @@ fn listen() -> Result<(), String>{
             table_data: Vec::new()
         };
         table.create_headers();
-        setup_table(&mut table).unwrap();
+        setup_table(&mut table)?;
         for _ in 0..height {
             terminal.cursor_up().unwrap();
             terminal.delete_line().unwrap();
@@ -56,7 +55,7 @@ fn listen() -> Result<(), String>{
 }
 
 pub fn setup_table(table: &mut TableManager) -> Result<(), String> {
-    let tasks: Vec<Task> = TaskManager::get_tasks();
+    let tasks: Vec<Task> = TaskManager::get_tasks()?;
     for task in tasks.iter() {
         let command = match CommandManager::read_command_data(task.id) {
             Ok(result) => result,

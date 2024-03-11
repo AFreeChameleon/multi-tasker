@@ -1,55 +1,29 @@
 use std::env::args;
+use commands::{create, delete, ls, start, stop, logs, help, restart, health};
 
 mod commands;
-mod managers;
-
-#[cfg(target_os = "linux")]
 mod platform_lib;
 
-#[cfg(target_os = "windows")]
-mod windows;
-
-use commands::{create, delete, ls, start, stop, logs, help};
-use managers::{task, command, table};
-
+const NO_MODE_TEXT: &str = "No mode given, usage: mult [start|stop|ls] [command|task id]\n
+For a full list of commands: mult help";
 fn main() {
     if let Some(mode) = args().nth(1) {
-        match mode.as_str() {
-            "create" => match create::run() {
-                Ok(()) => println!("Command finished."),
-                Err(message) => println!("{}", message)
-            },
-            "start" => match start::run() {
-                Ok(()) => println!("Process finished."),
-                Err(message) => println!("{}", message)
-            },
-            "stop" => match stop::run() {
-                Ok(()) => println!("Process stopped."),
-                Err(message) => println!("{}", message)
-            },
-            "logs" => match logs::run() {
-                Ok(()) => println!("Logs stopped."),
-                Err(message) => println!("{}", message)
-            },
-            "delete" => match delete::run() {
-                Ok(()) => println!("Process deleted."),
-                Err(message) => println!("{}", message)
-            },
-            "help" => match help::run() {
-                Ok(()) => (),
-                Err(message) => println!("{}", message)
-            },
-            "ls" => match ls::run() {
-                Ok(()) => (),
-                Err(message) => println!("{}", message)
-            },
-            _ => println!("Command not start|stop|ls")
-        };
+        if let Err(message) = match mode.as_str() {
+            "create" => create::run(),
+            "start" => start::run(),
+            "stop" => stop::run(),
+            "restart" => restart::run(),
+            "logs" => logs::run(),
+            "delete" => delete::run(),
+            "help" => help::run(),
+            "ls" => ls::run(),
+            "health" => health::run(),
+            _ => Err("Command not found.".to_string())
+        } {
+            println!("{message}");
+        }
     } else {
-        println!("
-            No mode given, usage: mult [start|stop|ls] [command|task id]\n
-            For a full list of commands: mult help
-        ");
+        println!("{NO_MODE_TEXT}");
     }
 }
 

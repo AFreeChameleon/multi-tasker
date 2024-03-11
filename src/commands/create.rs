@@ -1,11 +1,11 @@
 use std::env::args;
 
-use crate::task::{Task, TaskManager};
+use mult_lib::task::{Task, TaskManager};
 
 #[cfg(target_os = "linux")]
 use crate::platform_lib::linux::fork;
 #[cfg(target_os = "windows")]
-use crate::windows;
+use crate::platform_lib::windows::fork;
 
 pub fn run() -> Result<(), String> {
     let command = match args().nth(2) {
@@ -13,7 +13,7 @@ pub fn run() -> Result<(), String> {
         None => return Err("Missing command, see 'mult help' for more.".to_string())
     };
     let mut new_task_id = 0;
-    let mut tasks: Vec<Task> = TaskManager::get_tasks();
+    let mut tasks: Vec<Task> = TaskManager::get_tasks()?;
     if let Some(last_task) = tasks.last() {
         new_task_id = last_task.id + 1;
     }
@@ -28,11 +28,11 @@ pub fn run() -> Result<(), String> {
         };
     } else if cfg!(target_os = "windows") {
         #[cfg(target_os = "windows")]
-        // let batch_file_path = windows::generate_batch_file(new_task_id, &command).unwrap();
-        windows::daemonize_task(new_task_id, &command);
+        fork::run_daemon(files, command)?;
     } else {
         println!("Linux is only supported at the moment");
     }
+    println!("Process created.");
     Ok(())
 }
 
