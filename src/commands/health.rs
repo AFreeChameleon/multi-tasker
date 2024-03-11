@@ -1,13 +1,13 @@
 use std::io::Error;
 use std::fs;
 use std::path::Path;
-use colored::{control, Colorize};
+use colored::Colorize;
 
-use mult_lib::task::{TaskManager, Files};
-use mult_lib::command::{CommandData, CommandManager};
+use mult_lib::task::TaskManager;
 
 pub fn run() -> Result<(), String> {
-    control::set_virtual_terminal(true).unwrap();
+    #[cfg(target_os = "windows")]
+    colored::control::set_virtual_terminal(true).unwrap();
     println!("Running health check...");
     match run_tests() {
         Ok(()) => println!("No failures detected."),

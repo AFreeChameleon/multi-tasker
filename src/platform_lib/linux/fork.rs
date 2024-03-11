@@ -1,11 +1,11 @@
 #![cfg(target_os = "linux")]
 use std::{
-    ffi::CString, fs::File, io::{BufRead, BufReader, Write}, path::Path, process::{Command, Stdio}, thread, time::{SystemTime, UNIX_EPOCH}
+    env, fs::File, io::{BufRead, BufReader, Write}, path::Path, process::{Command, Stdio}, thread, time::{SystemTime, UNIX_EPOCH}
 };
+use home::home_dir;
 
-use libc::c_char;
-use mult_lib::managers::task::Files;
-use mult_lib::managers::command::{CommandManager, CommandData};
+use mult_lib::task::Files;
+use mult_lib::command::{CommandManager, CommandData};
 
 pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
     let process_id;
@@ -48,9 +48,15 @@ fn run_command(command: &str, process_dir: &Path) {
         .spawn()
         .expect("Command has failed.");
 
+    let current_dir = match env::current_dir() {
+        Ok(val) => val,
+        Err(_) => home_dir().unwrap()
+    };
+
     let data = CommandData {
         command: command.to_string(),
-        pid: child.id()
+        pid: child.id(),
+        dir: current_dir.display().to_string()
     };
     CommandManager::write_command_data(data, process_dir);
 
