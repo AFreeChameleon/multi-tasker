@@ -31,8 +31,6 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
         return Err("Setting sid failed".to_string())
     }
     unsafe {
-        let c_str = CString::new("/").unwrap();
-        libc::chdir(c_str.as_ptr() as *const c_char);
         libc::close(libc::STDIN_FILENO);
         libc::close(libc::STDOUT_FILENO);
         libc::close(libc::STDERR_FILENO);
