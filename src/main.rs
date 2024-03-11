@@ -1,5 +1,6 @@
 use std::env::args;
 use commands::{create, delete, ls, start, stop, logs, help, restart, health};
+use colored::Colorize;
 
 mod commands;
 mod platform_lib;
@@ -20,7 +21,7 @@ fn main() {
             "health" => health::run(),
             _ => Err("Command not found.".to_string())
         } {
-            println!("{message}");
+            println!("{} {message}", "Error:".red());
         }
     } else {
         println!("{NO_MODE_TEXT}");
