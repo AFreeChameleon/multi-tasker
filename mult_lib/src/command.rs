@@ -5,6 +5,8 @@ use std::{
 };
 use bincode;
 
+use crate::error::{MultError, MultErrorTuple};
+
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct CommandData {
     pub command: String,
@@ -15,7 +17,7 @@ pub struct CommandData {
 pub struct CommandManager {}
 
 impl CommandManager {
-    pub fn read_command_data(task_id: u32) -> Result<CommandData, String> {
+    pub fn read_command_data(task_id: u32) -> Result<CommandData, MultErrorTuple> {
         let dir_str = format!("{}/.multi-tasker/processes/{}", home::home_dir().unwrap().display(), task_id);
         let data_file = Path::new(&dir_str).join("data.bin");
         if data_file.exists() {
@@ -23,7 +25,7 @@ impl CommandManager {
             let data_decoded: CommandData = bincode::deserialize(&data_encoded[..]).unwrap();
             return Ok(data_decoded)
         }
-        Err("No task exists with that id.".to_string())
+        Err((MultError::TaskNotFound, None))
     }
 
     pub fn write_command_data(command: CommandData, process_dir: &Path) {

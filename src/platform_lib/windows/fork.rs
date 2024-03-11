@@ -2,9 +2,9 @@
 
 use std::{env, path::Path, process::Command};
 
-use mult_lib::task::Files;
+use mult_lib::{error::{MultError, MultErrorTuple}, task::Files};
 
-pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
+pub fn run_daemon(files: Files, command: String) -> Result<(), MultErrorTuple> {
     if let Ok(exe_dir) = env::current_exe() {
         let spawn_dir = Path::new(&exe_dir);
         Command::new("cmd")
@@ -17,7 +17,7 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
             .spawn()
             .expect("Spawning process has failed.");
     } else {
-        return Err("Could not get directory of executable.".to_string());
+        return Err((MultError::ExeDirNotFound, None));
     }
     Ok(())
 }

@@ -8,9 +8,9 @@ use std::{
     collections::VecDeque
 };
 
-use mult_lib::task::TaskManager;
+use mult_lib::{error::{MultError, MultErrorTuple}, task::TaskManager};
 
-pub fn run() -> Result<(), String> {
+pub fn run() -> Result<(), MultErrorTuple> {
     let tasks = TaskManager::get_tasks()?;
     let task_id: u32 = TaskManager::parse_arg(env::args().nth(2))?;
     let task = TaskManager::get_task(&tasks, task_id)?;
@@ -35,7 +35,7 @@ pub fn run() -> Result<(), String> {
     let mut last_lines_to_print = 15;
     let mut combined_lines = read_last_lines(&out_file, last_lines_to_print)?;
     combined_lines.append(
-        &mut read_last_lines(&err_file, last_lines_to_print).unwrap()
+        &mut read_last_lines(&err_file, last_lines_to_print)?
     );
     // Sorting lines by time
     let sorted_lines = sort_last_lines(combined_lines)?;
@@ -89,14 +89,14 @@ pub fn run() -> Result<(), String> {
 fn read_last_lines(
     file: &File,
     count: usize
-) -> Result<VecDeque<String>, String> {
+) -> Result<VecDeque<String>, MultErrorTuple> {
     let mut reader = BufReader::new(file);
     let mut line = String::new();
     let mut lines_cache = VecDeque::new();
     loop {
         let bytes_read = match reader.read_line(&mut line) {
-            Ok(l) => l,
-            Err(_) => return Err("Error while reading output file.".to_string())
+            Ok(val) => val,
+            Err(_) => return Err((MultError::CannotReadOutputFile, None))
         };
         if bytes_read == 0 {
             break;
@@ -116,7 +116,7 @@ struct Log {
 }
 fn sort_last_lines(
     lines: VecDeque<String>
-) -> Result<Vec<Log>, String> {
+) -> Result<Vec<Log>, MultErrorTuple> {
     let vecdeque_lines: VecDeque<Log> = lines.iter().map(|line: &String| {
         let (time_string, content) = line.split_once("|").unwrap();
         Log {

@@ -1,3 +1,5 @@
+use mult_lib::error::MultErrorTuple;
+
 const HELP_TEXT: &str = "usage: mult [options] [value]
 options:
     create  Create a process and run it. [value] must be a command e.g \"ping google.com\"
@@ -9,7 +11,7 @@ options:
     help    Shows available options.
 ";
 
-pub fn run() -> Result<(), String> {
+pub fn run() -> Result<(), MultErrorTuple> {
     println!("{HELP_TEXT}");
     Ok(())
 }

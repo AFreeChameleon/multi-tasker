@@ -1,5 +1,6 @@
 use std::env;
 
+use mult_lib::error::MultErrorTuple;
 use mult_lib::task::{TaskManager, Files};
 use mult_lib::command::{CommandData, CommandManager};
 
@@ -9,7 +10,7 @@ use crate::platform_lib::linux::fork;
 #[cfg(target_os = "windows")]
 use crate::platform_lib::windows::fork;
 
-pub fn run() -> Result<(), String> {
+pub fn run() -> Result<(), MultErrorTuple> {
     let tasks = TaskManager::get_tasks()?;
     let task_id: u32 = TaskManager::parse_arg(env::args().nth(2))?;
     let task = TaskManager::get_task(&tasks, task_id)?;
@@ -24,7 +25,7 @@ pub fn run() -> Result<(), String> {
     Ok(())
 }
 
-pub fn start_process(files: Files, command_data: CommandData) -> Result<(), String> {
+pub fn start_process(files: Files, command_data: CommandData) -> Result<(), MultErrorTuple> {
     if cfg!(target_os = "linux") {
         #[cfg(target_os = "linux")]
         match fork::run_daemon(files, command_data.command) {

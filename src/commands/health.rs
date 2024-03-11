@@ -5,7 +5,7 @@ use colored::Colorize;
 use mult_lib::error::{MultError, MultErrorTuple, print_error};
 use mult_lib::task::TaskManager;
 
-pub fn run() -> Result<(), String> {
+pub fn run() -> Result<(), MultErrorTuple> {
     #[cfg(target_os = "windows")]
     colored::control::set_virtual_terminal(true).unwrap();
     println!("Running health check...");
@@ -34,7 +34,7 @@ fn run_tests() -> Result<(), Option<MultErrorTuple>> {
     // Checking for processes while no task file exists
     if !tasks_dir.join("tasks.bin").exists() {
         for name in processes {
-            print_error(MultError::UnknownProcessInDir, Some(name.red()));
+            print_error(MultError::UnknownProcessInDir, Some(name.red().to_string()));
         }
         return Err(None)
     }
@@ -54,11 +54,11 @@ fn run_tests() -> Result<(), Option<MultErrorTuple>> {
         }
         match TaskManager::test_task_files(task.id) {
             Ok(()) => (),
-            Err(msg) => println!("{msg}") 
+            Err((err, desc)) => { print_error(err, desc); } 
         };
     }
     for process in processes {
-        println!("{} unknown process in dir: {}", "Error:".red(), process);
+        print_error(MultError::UnknownProcessInDir, Some(process));
     }
     Ok(())
 }

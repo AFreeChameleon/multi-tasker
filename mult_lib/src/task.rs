@@ -60,10 +60,10 @@ impl TaskManager {
         Ok(Vec::new())
     }
 
-    pub fn get_task(tasks: &Vec<Task>, id: u32) -> Result<Task, String> {
+    pub fn get_task(tasks: &Vec<Task>, id: u32) -> Result<Task, MultErrorTuple> {
         let task: Task = match tasks.iter().find(|&t| t.id == id).cloned() {
             Some(t) => t,
-            None => return Err("No task exists with that id, use mult ls to see the available tasks.".to_string())
+            None => return Err((MultError::TaskNotFound, None))
         };
         Ok(task)
     }
@@ -76,19 +76,19 @@ impl TaskManager {
         tasks_file.write_all(&encoded_data).unwrap();
     }
 
-    pub fn get_task_from_arg(nth_arg: usize) -> Result<(Task, CommandData, Vec<Task>), String> {
+    pub fn get_task_from_arg(nth_arg: usize) -> Result<(Task, CommandData, Vec<Task>), MultErrorTuple> {
         let tasks: Vec<Task> = TaskManager::get_tasks()?;
         let task_id: u32 = match args().nth(nth_arg) {
             Some(arg) => match arg.parse::<u32>() {
                 Ok(id) => id,
-                Err(_) => return Err("Invalid id, see 'mult help' for more.".to_string())
+                Err(_) => return Err((MultError::InvalidTaskId, None))
             },
-            None => return Err("Missing/invalid id, see 'mult help' for more.".to_string())
+            None => return Err((MultError::InvalidTaskId, None))
         };
 
         let task: Task = match tasks.iter().find(|&t| t.id == task_id).cloned() {
             Some(t) => t,
-            None => return Err("No task exists with that id, use mult ls to see the available tasks.".to_string())
+            None => return Err((MultError::TaskNotFound, None))
         };
         let command_data = match CommandManager::read_command_data(task.id) {
             Ok(data) => data,
@@ -121,13 +121,13 @@ impl TaskManager {
         }
     }
 
-    pub fn parse_arg(arg: Option<String>) -> Result<u32, String> {
+    pub fn parse_arg(arg: Option<String>) -> Result<u32, MultErrorTuple> {
         let task_id: u32 = match arg {
             Some(arg) => match arg.parse::<u32>() {
                 Ok(id) => id,
-                Err(_) => return Err("Invalid id, see 'mult help' for more.".to_string())
+                Err(_) => return Err((MultError::InvalidTaskId, None))
             },
-            None => return Err("Missing/invalid id, see 'mult help' for more.".to_string())
+            None => return Err((MultError::InvalidTaskId, None))
         };
         Ok(task_id)
     }
