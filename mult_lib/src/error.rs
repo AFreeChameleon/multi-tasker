@@ -19,7 +19,10 @@ pub enum MultError {
     ExeDirNotFound,
     WindowsNotSupported,
     InvalidArgument,
-    CannotReadOutputFile
+    CannotReadOutputFile,
+    // Linux only
+    ForkFailed,
+    SetSidFailed
 }
 
 pub fn print_error(error: MultError, descriptor: Option<String>) {
@@ -40,7 +43,9 @@ pub fn print_error(error: MultError, descriptor: Option<String>) {
         MultError::ProcessNotRunning => "Process is not running.".to_string(),
         MultError::WindowsNotSupported => format!("Windows does not support {}.", descriptor.unwrap()),
         MultError::InvalidArgument => format!("Invalid argument {}.", descriptor.unwrap()),
-        MultError::CannotReadOutputFile => "Error while reading output file.".to_string(),
+        MultError::CannotReadOutputFile => "Could not read output file.".to_string(),
+        MultError::ForkFailed => "Fork failed.".to_string(),
+        MultError::SetSidFailed => "Setting sid failed.".to_string(),
     };
     println!("{} {}", "Error:".red(), message);
 }

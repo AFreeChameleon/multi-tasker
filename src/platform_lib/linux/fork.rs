@@ -4,10 +4,11 @@ use std::{
 };
 use home::home_dir;
 
+use mult_lib::error::{MultError, MultErrorTuple};
 use mult_lib::task::Files;
 use mult_lib::command::{CommandManager, CommandData};
 
-pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
+pub fn run_daemon(files: Files, command: String) -> Result<(), MultErrorTuple> {
     let process_id;
     let sid;
     unsafe {
@@ -16,7 +17,7 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
     // Fork failed
     if process_id < 0 {
         println!("Fork failed");
-        return Err("Fork failed".to_string())
+        return Err((MultError::ForkFailed, None))
     }
     // Parent process - need to kill it
     if process_id > 0 {
@@ -28,7 +29,7 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), String> {
         sid = libc::setsid();
     }
     if sid < 0 {
-        return Err("Setting sid failed".to_string())
+        return Err((MultError::SetSidFailed, None))
     }
     unsafe {
         libc::close(libc::STDIN_FILENO);
