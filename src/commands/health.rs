@@ -1,7 +1,5 @@
 use std::fs;
 use std::path::Path;
-#[cfg(target_os = "windows")]
-use colored::Colorize;
 
 use mult_lib::error::{print_error, print_success, MultError, MultErrorTuple};
 use mult_lib::task::TaskManager;
