@@ -8,9 +8,19 @@ use std::{
     collections::VecDeque
 };
 
-use mult_lib::{error::{MultError, MultErrorTuple}, task::TaskManager};
+use mult_lib::{args::{parse_args, ParsedArgs}, error::{MultError, MultErrorTuple}, task::TaskManager};
 
+const LINES_FLAG: &str = "--lines";
+const FLAGS: [(&str, bool); 1] = [
+    (LINES_FLAG, true)
+];
+
+// Add --watch & --lines
 pub fn run() -> Result<(), MultErrorTuple> {
+    let parsed_args = parse_args(&FLAGS)?;
+    // Reading last 15 lines from stdout and stderr
+    let mut last_lines_to_print: usize = get_last_lines_to_print(&parsed_args)?;
+
     let tasks = TaskManager::get_tasks()?;
     let task_id: u32 = TaskManager::parse_arg(env::args().nth(2))?;
     let task = TaskManager::get_task(&tasks, task_id)?;
@@ -31,8 +41,6 @@ pub fn run() -> Result<(), MultErrorTuple> {
     let mut err_file = File::open(&err_file_path).unwrap();
     let mut err_pos = fs::metadata(&err_file_path).unwrap().len();
 
-    // Reading last 15 lines from stdout and stderr
-    let mut last_lines_to_print = 15;
     let mut combined_lines = read_last_lines(&out_file, last_lines_to_print)?;
     combined_lines.append(
         &mut read_last_lines(&err_file, last_lines_to_print)?
@@ -84,6 +92,22 @@ pub fn run() -> Result<(), MultErrorTuple> {
 
     println!("Logs stopped.");
     Ok(())
+}
+
+fn get_last_lines_to_print(parsed_args: &ParsedArgs) -> Result<usize, MultErrorTuple> {
+    // Reading last 15 lines from stdout and stderr
+    let mut last_lines_to_print: usize = 15;
+    if let Some(line_count) = parsed_args.value_flags.clone().into_iter().find(|(flag, _)| {
+        flag == LINES_FLAG
+    }) {
+        if line_count.1.is_some() && String::from(line_count.1.clone().unwrap()).parse::<usize>().is_ok() {
+            last_lines_to_print = match String::from(line_count.1.clone().unwrap()).parse::<usize>() {
+                Ok(val) => val,
+                Err(_) => return Err((MultError::InvalidArgument, Some(line_count.1.unwrap())))
+            };
+        }
+    }
+    Ok(last_lines_to_print)
 }
 
 fn read_last_lines(
