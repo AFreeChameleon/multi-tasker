@@ -1,16 +1,17 @@
 use std::env::args;
 
 use mult_lib::task::{Task, TaskManager};
+use mult_lib::error::{print_success, MultError, MultErrorTuple};
 
 #[cfg(target_os = "linux")]
 use crate::platform_lib::linux::fork;
 #[cfg(target_os = "windows")]
 use crate::platform_lib::windows::fork;
 
-pub fn run() -> Result<(), String> {
+pub fn run() -> Result<(), MultErrorTuple> {
     let command = match args().nth(2) {
         Some(val) => val,
-        None => return Err("Missing command, see 'mult help' for more.".to_string())
+        None => return Err((MultError::MissingCommand, None))
     };
     let mut new_task_id = 0;
     let mut tasks: Vec<Task> = TaskManager::get_tasks()?;
@@ -30,9 +31,9 @@ pub fn run() -> Result<(), String> {
         #[cfg(target_os = "windows")]
         fork::run_daemon(files, command)?;
     } else {
-        println!("Linux is only supported at the moment");
+        return Err((MultError::OSNotSupported, None));
     }
-    println!("Process created.");
+    print_success("Process created.");
     Ok(())
 }
 

@@ -1,13 +1,13 @@
 use std::env;
 
+use mult_lib::error::{print_success, MultErrorTuple};
 use mult_lib::task::TaskManager;
 use mult_lib::command::CommandManager;
 
 use crate::stop::kill_process;
+use crate::start::start_process;
 
-use super::start::start_process;
-
-pub fn run() -> Result<(), String> {
+pub fn run() -> Result<(), MultErrorTuple> {
     let tasks = TaskManager::get_tasks()?;
     let task_id: u32 = TaskManager::parse_arg(env::args().nth(2))?;
     let task = TaskManager::get_task(&tasks, task_id)?;
@@ -16,11 +16,8 @@ pub fn run() -> Result<(), String> {
     kill_process(command_data.pid)?;
     let files = TaskManager::generate_task_files(task.id, &tasks);
     println!("Restarting process...");
-    match start_process(files, command_data) {
-        Ok(_) => {},
-        Err(msg) => return Err(msg)
-    };
-    println!("Process restarted.");
+    start_process(files, command_data)?;
+    print_success("Process restarted.");
     Ok(())
 }
 

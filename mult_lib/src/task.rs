@@ -9,6 +9,7 @@ use bincode;
 use home;
 use colored::Colorize;
 
+use crate::error::{MultError, MultErrorTuple};
 use crate::command::{CommandData, CommandManager};
 
 const PROCESS_FILES: [&str; 3] = ["stdout.out", "stderr.err", "data.bin"];
@@ -27,11 +28,11 @@ pub struct Task {
 pub struct TaskManager {}
 
 impl TaskManager {
-    pub fn test_task_files(id: u32) -> Result<(), String> {
+    pub fn test_task_files(id: u32) -> Result<(), MultErrorTuple> {
         let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
         let tasks_dir = Path::new(&tasks_dir_str).join(id.to_string());
         if tasks_dir.exists() {
-            return Err(format!("Could not get task directory {}.", id.to_string()))
+            return Err((MultError::TaskDirNotExist, Some(id.to_string())))
         }
         for file in PROCESS_FILES.iter() {
             if tasks_dir.join(file).exists() {
@@ -41,24 +42,28 @@ impl TaskManager {
         Ok(())
     }
     
-    pub fn get_tasks() -> Result<Vec<Task>, String> {
+    pub fn get_tasks() -> Result<Vec<Task>, MultErrorTuple> {
         let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
-        let tasks_file = Path::new(&tasks_dir_str).join("tasks.bin");
+        let main_dir = Path::new(&tasks_dir_str);
+        if !main_dir.exists() {
+            return Err((MultError::MainDirNotExist, None))
+        }
+        let tasks_file = main_dir.join("tasks.bin");
         if tasks_file.exists() {
             let tasks_encoded: Vec<u8> = fs::read(tasks_file).unwrap(); 
             let tasks_decoded: Vec<Task> = match bincode::deserialize(&tasks_encoded[..]) {
                 Ok(val) => val,
-                Err(_) => return Err("Failed to read from tasks file.".to_string())
+                Err(_) => return Err((MultError::TaskBinFileUnreadable, None))
             };
             return Ok(tasks_decoded);
         }
         Ok(Vec::new())
     }
 
-    pub fn get_task(tasks: &Vec<Task>, id: u32) -> Result<Task, String> {
+    pub fn get_task(tasks: &Vec<Task>, id: u32) -> Result<Task, MultErrorTuple> {
         let task: Task = match tasks.iter().find(|&t| t.id == id).cloned() {
             Some(t) => t,
-            None => return Err("No task exists with that id, use mult ls to see the available tasks.".to_string())
+            None => return Err((MultError::TaskNotFound, None))
         };
         Ok(task)
     }
@@ -71,19 +76,19 @@ impl TaskManager {
         tasks_file.write_all(&encoded_data).unwrap();
     }
 
-    pub fn get_task_from_arg(nth_arg: usize) -> Result<(Task, CommandData, Vec<Task>), String> {
+    pub fn get_task_from_arg(nth_arg: usize) -> Result<(Task, CommandData, Vec<Task>), MultErrorTuple> {
         let tasks: Vec<Task> = TaskManager::get_tasks()?;
         let task_id: u32 = match args().nth(nth_arg) {
             Some(arg) => match arg.parse::<u32>() {
                 Ok(id) => id,
-                Err(_) => return Err("Invalid id, see 'mult help' for more.".to_string())
+                Err(_) => return Err((MultError::InvalidTaskId, None))
             },
-            None => return Err("Missing/invalid id, see 'mult help' for more.".to_string())
+            None => return Err((MultError::InvalidTaskId, None))
         };
 
         let task: Task = match tasks.iter().find(|&t| t.id == task_id).cloned() {
             Some(t) => t,
-            None => return Err("No task exists with that id, use mult ls to see the available tasks.".to_string())
+            None => return Err((MultError::TaskNotFound, None))
         };
         let command_data = match CommandManager::read_command_data(task.id) {
             Ok(data) => data,
@@ -116,13 +121,13 @@ impl TaskManager {
         }
     }
 
-    pub fn parse_arg(arg: Option<String>) -> Result<u32, String> {
+    pub fn parse_arg(arg: Option<String>) -> Result<u32, MultErrorTuple> {
         let task_id: u32 = match arg {
             Some(arg) => match arg.parse::<u32>() {
                 Ok(id) => id,
-                Err(_) => return Err("Invalid id, see 'mult help' for more.".to_string())
+                Err(_) => return Err((MultError::InvalidTaskId, None))
             },
-            None => return Err("Missing/invalid id, see 'mult help' for more.".to_string())
+            None => return Err((MultError::InvalidTaskId, None))
         };
         Ok(task_id)
     }

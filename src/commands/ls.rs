@@ -1,4 +1,5 @@
 use std::{env, thread, time::Duration};
+use mult_lib::error::{MultError, MultErrorTuple};
 use prettytable::Table;
 use sysinfo::{System, Pid};
 
@@ -6,21 +7,21 @@ use mult_lib::table::{MainHeaders, ProcessHeaders, TableManager};
 use mult_lib::task::{Task, TaskManager};
 use mult_lib::command::CommandManager;
 
-pub fn run() -> Result<(), String> {
+pub fn run() -> Result<(), MultErrorTuple> {
     let mut table = TableManager {
         ascii_table: Table::new(),
         table_data: Vec::new()
     };
     table.create_headers();
-    setup_table(&mut table).unwrap();
+    setup_table(&mut table)?;
     if let Some(new_arg) = env::args().nth(2) {
         if new_arg == "--listen" {
             if cfg!(target_os = "windows") {
-                return Err("Windows does not support --listen".to_string());
+                return Err((MultError::WindowsNotSupported, Some("--listen".to_string())));
             }
             listen()?;
         } else {
-            return Err(format!("Invalid argument {new_arg}."))
+            return Err((MultError::InvalidArgument, Some(new_arg)))
         }
     } else {
         table.print();
@@ -29,7 +30,7 @@ pub fn run() -> Result<(), String> {
     Ok(())
 }
 
-fn listen() -> Result<(), String>{
+fn listen() -> Result<(), MultErrorTuple> {
     let mut table = TableManager {
         ascii_table: Table::new(),
         table_data: Vec::new()
@@ -54,12 +55,12 @@ fn listen() -> Result<(), String>{
     }
 }
 
-pub fn setup_table(table: &mut TableManager) -> Result<(), String> {
+pub fn setup_table(table: &mut TableManager) -> Result<(), MultErrorTuple> {
     let tasks: Vec<Task> = TaskManager::get_tasks()?;
     for task in tasks.iter() {
         let command = match CommandManager::read_command_data(task.id) {
             Ok(result) => result,
-            Err(message) => return Err(message)
+            Err(err) => return Err(err)
         };
         let sys = System::new_all();
 
