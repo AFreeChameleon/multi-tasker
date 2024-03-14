@@ -1,11 +1,6 @@
 use std::env;
 
-use crate::error::{MultError, MultErrorTuple};
-
-const WATCH_FLAG: &str = "--watch";
-const FLAGS: [(&str, bool); 1] = [
-    (WATCH_FLAG, false)
-];
+use crate::error::MultErrorTuple;
 
 pub struct ParsedArgs {
     pub flags: Vec<String>,

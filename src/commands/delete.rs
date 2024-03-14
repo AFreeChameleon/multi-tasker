@@ -1,8 +1,8 @@
-use std::{env, fs};
+use std::fs;
 
 use mult_lib::args::parse_args;
 use mult_lib::command::CommandManager;
-use mult_lib::error::{MultError, MultErrorTuple};
+use mult_lib::error::{print_success, MultError, MultErrorTuple};
 use mult_lib::task::TaskManager;
 use crate::stop::kill_process;
 
@@ -28,8 +28,9 @@ pub fn run() -> Result<(), MultErrorTuple> {
             Ok(()) => {},
             Err(_) => return Err((MultError::ProcessDirNotExist, None))
         };
+        print_success(&format!("Process {} deleted.", task_id));
     }
     TaskManager::write_tasks_file(&new_tasks);
-    println!("Process deleted.");
+    println!("Processes saved.");
     Ok(())
 }
