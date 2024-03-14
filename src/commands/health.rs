@@ -1,8 +1,9 @@
 use std::fs;
 use std::path::Path;
+#[cfg(target_os = "windows")]
 use colored::Colorize;
 
-use mult_lib::error::{MultError, MultErrorTuple, print_error};
+use mult_lib::error::{print_error, print_success, MultError, MultErrorTuple};
 use mult_lib::task::TaskManager;
 
 pub fn run() -> Result<(), MultErrorTuple> {
@@ -25,25 +26,29 @@ fn run_tests() -> Result<(), Option<MultErrorTuple>> {
     if !tasks_dir.exists() && tasks_dir.is_dir() {
         return Err(Some((MultError::MainDirNotExist, None)))
     }
+    print_success("Main directory exists.");
     // Check tasks file exists
     let processes_dir = tasks_dir.join("processes");
     let mut processes = match check_processes_dir(&processes_dir) {
         Ok(val) => val,
         Err(msg) => return Err(Some(msg))
     };
+    print_success("Processes directory exists.");
     // Checking for processes while no task file exists
     if !tasks_dir.join("tasks.bin").exists() {
         for name in processes {
-            print_error(MultError::UnknownProcessInDir, Some(name.red().to_string()));
+            print_error(MultError::UnknownProcessInDir, Some(name.to_string()));
         }
         return Err(None)
     }
+    print_success("Tasks file exists.");
     let tasks = match TaskManager::get_tasks() {
         Ok(val) => val,
         Err(msg) => {
             return Err(Some(msg));
         }
     };
+    print_success("Tasks file read.");
     // Check process dir, log files & data binary
     for task in tasks.iter() {
         if processes.contains(&task.id.to_string()) {
@@ -57,6 +62,7 @@ fn run_tests() -> Result<(), Option<MultErrorTuple>> {
             Err((err, desc)) => { print_error(err, desc); } 
         };
     }
+    print_success("Task logs read.");
     for process in processes {
         print_error(MultError::UnknownProcessInDir, Some(process));
     }

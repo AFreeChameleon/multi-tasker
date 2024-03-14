@@ -16,7 +16,6 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), MultErrorTuple> {
     }
     // Fork failed
     if process_id < 0 {
-        println!("Fork failed");
         return Err((MultError::ForkFailed, None))
     }
     // Parent process - need to kill it
@@ -78,7 +77,7 @@ fn run_command(command: &str, process_dir: &Path) {
                 .unwrap()
                 .as_millis();
             let formatted_line = format!(
-                "{:}|{}",
+                "{:}|{}\n",
                 now,
                 line.expect("Problem reading stdout.")
             ); 

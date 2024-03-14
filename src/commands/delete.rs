@@ -11,7 +11,10 @@ pub fn run() -> Result<(), MultErrorTuple> {
     let task_id: u32 = TaskManager::parse_arg(env::args().nth(2))?;
     let task = TaskManager::get_task(&tasks, task_id)?;
     let command_data = CommandManager::read_command_data(task.id)?;
-    kill_process(command_data.pid)?;
+    match kill_process(command_data.pid) {
+        Ok(_) => (),
+        Err(_) => { println!("Process is not running.") }
+    };
     new_tasks = new_tasks.into_iter().filter(|t| t.id != task_id).collect();
     let process_dir_str = format!(
         "{}/.multi-tasker/processes/{}",

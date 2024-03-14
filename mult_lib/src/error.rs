@@ -5,6 +5,7 @@ pub type MultErrorTuple = (MultError, Option<String>);
 pub enum MultError {
     MainDirNotExist,
     ProcessNotRunning,
+    ProcessAlreadyRunning,
     ProcessDirNotExist,
     UnknownProcessInDir,
     FailedReadingProcessDir,
@@ -20,6 +21,7 @@ pub enum MultError {
     WindowsNotSupported,
     InvalidArgument,
     CannotReadOutputFile,
+    OSNotSupported,
     // Linux only
     ForkFailed,
     SetSidFailed
@@ -41,11 +43,17 @@ pub fn print_error(error: MultError, descriptor: Option<String>) {
         MultError::MissingCommand => "Missing command, see 'mult help' for more.".to_string(),
         MultError::ExeDirNotFound => "Could not get directory of executable.".to_string(),
         MultError::ProcessNotRunning => "Process is not running.".to_string(),
+        MultError::ProcessAlreadyRunning => "Process is already running.".to_string(),
         MultError::WindowsNotSupported => format!("Windows does not support {}.", descriptor.unwrap()),
         MultError::InvalidArgument => format!("Invalid argument {}.", descriptor.unwrap()),
         MultError::CannotReadOutputFile => "Could not read output file.".to_string(),
         MultError::ForkFailed => "Fork failed.".to_string(),
         MultError::SetSidFailed => "Setting sid failed.".to_string(),
+        MultError::OSNotSupported => "Windows & linux is only officially supported at the moment".to_string(),
     };
     println!("{} {}", "Error:".red(), message);
+}
+
+pub fn print_success(text: &str) {
+    println!("{} {text}", "Success".green());
 }

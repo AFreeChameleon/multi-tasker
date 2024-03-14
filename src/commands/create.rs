@@ -1,6 +1,7 @@
 use std::env::args;
 
-use mult_lib::{error::{MultError, MultErrorTuple}, task::{Task, TaskManager}};
+use mult_lib::task::{Task, TaskManager};
+use mult_lib::error::{print_success, MultError, MultErrorTuple};
 
 #[cfg(target_os = "linux")]
 use crate::platform_lib::linux::fork;
@@ -30,9 +31,9 @@ pub fn run() -> Result<(), MultErrorTuple> {
         #[cfg(target_os = "windows")]
         fork::run_daemon(files, command)?;
     } else {
-        println!("Linux is only supported at the moment");
+        return Err((MultError::OSNotSupported, None));
     }
-    println!("Process created.");
+    print_success("Process created.");
     Ok(())
 }
 
