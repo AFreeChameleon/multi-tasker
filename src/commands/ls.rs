@@ -1,28 +1,31 @@
 use std::{env, thread, time::Duration};
-use mult_lib::error::{MultError, MultErrorTuple};
+use mult_lib::args::parse_args;
 use prettytable::Table;
 use sysinfo::{System, Pid};
 
+use mult_lib::error::{MultError, MultErrorTuple};
 use mult_lib::table::{MainHeaders, ProcessHeaders, TableManager};
 use mult_lib::task::{Task, TaskManager};
 use mult_lib::command::CommandManager;
 
+const WATCH_FLAG: &str = "--watch";
+const FLAGS: [(&str, bool); 1] = [
+    (WATCH_FLAG, false)
+];
+
 pub fn run() -> Result<(), MultErrorTuple> {
+    let parsed_args = parse_args(&FLAGS)?;
     let mut table = TableManager {
         ascii_table: Table::new(),
         table_data: Vec::new()
     };
     table.create_headers();
     setup_table(&mut table)?;
-    if let Some(new_arg) = env::args().nth(2) {
-        if new_arg == "--listen" {
-            if cfg!(target_os = "windows") {
-                return Err((MultError::WindowsNotSupported, Some("--listen".to_string())));
-            }
-            listen()?;
-        } else {
-            return Err((MultError::InvalidArgument, Some(new_arg)))
+    if parsed_args.flags.contains(&WATCH_FLAG.to_string()) {
+        if cfg!(target_os = "windows") {
+            return Err((MultError::WindowsNotSupported, Some("--watch".to_string())));
         }
+        listen()?;
     } else {
         table.print();
     }

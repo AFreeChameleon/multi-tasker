@@ -12,7 +12,7 @@ options:
 
     ls      Shows all processes.
 
-            --listen    Provides updating view every 2 seconds.
+            --watch    Provides updating tables every 2 seconds.
 
     logs    Shows output from process. [value] must be a task id e.g 0
 
