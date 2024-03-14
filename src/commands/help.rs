@@ -12,13 +12,18 @@ options:
 
     ls      Shows all processes.
 
-            --watch    Provides updating tables every 2 seconds.
+            --watch         Provides updating tables every 2 seconds.
 
     logs    Shows output from process. [value] must be a task id e.g 0
+            
+            --lines [num]   See number of previous lines default is 15.
+            --watch         Listen to new logs coming in.
 
     delete  Deletes process. [value] must be a task id e.g 0
 
     help    Shows available options.
+
+    health  Checks state of mult, run this when mult is not working.
 ";
 
 pub fn run() -> Result<(), MultErrorTuple> {

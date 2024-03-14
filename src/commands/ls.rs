@@ -1,4 +1,4 @@
-use std::{env, thread, time::Duration};
+use std::{thread, time::Duration};
 use mult_lib::args::parse_args;
 use prettytable::Table;
 use sysinfo::{System, Pid};
