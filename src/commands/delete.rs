@@ -16,7 +16,7 @@ pub fn run() -> Result<(), MultErrorTuple> {
         let command_data = CommandManager::read_command_data(task.id)?;
         match kill_process(command_data.pid) {
             Ok(_) => (),
-            Err(_) => { println!("Process is not running.") }
+            Err(_) => { println!("Process {} is not running.", task_id) }
         };
         new_tasks = new_tasks.into_iter().filter(|t| t.id != task_id).collect();
         let process_dir_str = format!(
