@@ -22,7 +22,7 @@ pub fn run() -> Result<(), MultErrorTuple> {
     table.create_headers();
     setup_table(&mut table)?;
     if parsed_args.flags.contains(&WATCH_FLAG.to_string()) {
-        if cfg!(target_os = "windows") {
+        if cfg!(target_family = "windows") {
             return Err((MultError::WindowsNotSupported, Some("--watch".to_string())));
         }
         listen()?;

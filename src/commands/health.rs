@@ -5,7 +5,7 @@ use mult_lib::error::{print_error, print_success, MultError, MultErrorTuple};
 use mult_lib::task::TaskManager;
 
 pub fn run() -> Result<(), MultErrorTuple> {
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     colored::control::set_virtual_terminal(true).unwrap();
     println!("Running health check...");
     match run_tests() {

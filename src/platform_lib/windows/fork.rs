@@ -1,4 +1,4 @@
-#![cfg(target_os = "windows")]
+#![cfg(target_family = "windows")]
 
 use std::{env, path::Path, process::Command};
 

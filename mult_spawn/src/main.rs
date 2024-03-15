@@ -1,5 +1,5 @@
 #![windows_subsystem = "windows"]
-#![cfg(target_os = "windows")]
+#![cfg(target_family = "windows")]
 
 use std::{
     thread,

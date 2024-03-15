@@ -6,10 +6,10 @@ use mult_lib::task::{TaskManager, Files};
 use mult_lib::command::{CommandData, CommandManager};
 use sysinfo::{Pid, System};
 
-#[cfg(target_os = "linux")]
+#[cfg(target_family = "unix")]
 use crate::platform_lib::linux::fork;
 
-#[cfg(target_os = "windows")]
+#[cfg(target_family = "windows")]
 use crate::platform_lib::windows::fork;
 
 pub fn run() -> Result<(), MultErrorTuple> {
@@ -34,17 +34,9 @@ pub fn run() -> Result<(), MultErrorTuple> {
 }
 
 pub fn start_process(files: Files, command_data: CommandData) -> Result<(), MultErrorTuple> {
-    if cfg!(target_os = "linux") {
-        #[cfg(target_os = "linux")]
-        match fork::run_daemon(files, command_data.command) {
-            Ok(()) => (),
-            Err(msg) => return Err(msg)
-        };
-    } else if cfg!(target_os = "windows") {
-        #[cfg(target_os = "windows")]
-        fork::run_daemon(files, command_data.command)?;
-    } else {
-        println!("Windows & linux is only supported at the moment");
-    }
+    #[cfg(target_family = "unix")]
+    fork::run_daemon(files, command_data.command)?;
+    #[cfg(target_family = "windows")]
+    fork::run_daemon(files, command_data.command)?;
     Ok(())
 }

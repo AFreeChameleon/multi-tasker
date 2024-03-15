@@ -2,9 +2,9 @@ use mult_lib::args::parse_args;
 use mult_lib::task::{Task, TaskManager};
 use mult_lib::error::{print_success, MultErrorTuple};
 
-#[cfg(target_os = "linux")]
+#[cfg(target_family = "unix")]
 use crate::platform_lib::linux::fork;
-#[cfg(target_os = "windows")]
+#[cfg(target_family = "windows")]
 use crate::platform_lib::windows::fork;
 
 pub fn run() -> Result<(), MultErrorTuple> {
@@ -19,10 +19,10 @@ pub fn run() -> Result<(), MultErrorTuple> {
         println!("Running command...");
         let files = TaskManager::generate_task_files(new_task_id, &tasks);
 
-        #[cfg(target_os = "linux")]
+        #[cfg(target_family = "unix")]
         fork::run_daemon(files, arg.to_string())?;
 
-        #[cfg(target_os = "windows")]
+        #[cfg(target_family = "windows")]
         fork::run_daemon(files, arg.to_string())?;
         print_success(&format!("Process {} created.", new_task_id));
     }
