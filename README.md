@@ -8,7 +8,7 @@ A daemoniser for linux, mac & windows written in rust. Inspired by [pm2](https:/
 ## Getting Started
 
 ```
-~ mult help
+> mult help
 usage: mult [options] [value]
 options:
     create  Create a process and run it. [value] must be a command e.g "ping google.com"
@@ -31,7 +31,7 @@ options:
 Create a daemon process by typing:
 
 ```
-~ mlt create "ping google.com"
+> mlt create "ping google.com"
 ```
 
 This will start a new daemon process running the command specified.
@@ -39,7 +39,7 @@ This will start a new daemon process running the command specified.
 To see your running processes, run:
 
 ```
-~ mlt ls
+> mlt ls
 
 ┌────┬─────────────────┬───────┬─────────┬─────────┬─────┬─────────┐
 │ id │ command         │ pid   │ status  │ memory  │ cpu │ runtime │
@@ -59,31 +59,31 @@ To see your running processes, run:
 To stop the new process, run:
 
 ```
-~ mlt stop 0
+> mlt stop 0
 ```
 
 To start the process again, run:
 
 ```
-~ mlt start 0
+> mlt start 0
 ```
 
 To restart the process, run:
 
 ```
-~ mlt restart 0
+> mlt restart 0
 ```
 
 To delete the process and all logs, run:
 
 ```
-~ mlt delete 0
+> mlt delete 0
 ```
 
 If mult isn't working, you can run:
 
 ```
-~ mlt health
+> mlt health
 ```
 
 To see what's wrong with it. This is mainly for debugging purposes.
