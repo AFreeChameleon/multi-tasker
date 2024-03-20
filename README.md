@@ -101,4 +101,5 @@ Licensed under either of
 ### What I need to do:
 
 * Create install script
-* Add fix to health command
+* Add fix to health command V
+* Create config file to read
