@@ -6,7 +6,7 @@ use mult_lib::task::TaskManager;
 use mult_lib::command::CommandManager;
 
 pub fn run() -> Result<(), MultErrorTuple> {
-    let parsed_args = parse_args(&[])?;
+    let parsed_args = parse_args(&[], true)?;
     let tasks = TaskManager::get_tasks()?;
     for arg in parsed_args.values.iter() {
         let task_id: u32 = TaskManager::parse_arg(Some(arg.to_string()))?;

@@ -19,7 +19,7 @@ const FLAGS: [(&str, bool); 2] = [
 
 // Add --watch & --lines
 pub fn run() -> Result<(), MultErrorTuple> {
-    let parsed_args = parse_args(&FLAGS)?;
+    let parsed_args = parse_args(&FLAGS, true)?;
     // Reading last 15 lines from stdout and stderr
     let mut last_lines_to_print: usize = get_last_lines_to_print(&parsed_args)?;
 

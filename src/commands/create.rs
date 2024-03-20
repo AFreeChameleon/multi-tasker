@@ -8,7 +8,7 @@ use crate::platform_lib::linux::fork;
 use crate::platform_lib::windows::fork;
 
 pub fn run() -> Result<(), MultErrorTuple> {
-    let parsed_args = parse_args(&[])?;
+    let parsed_args = parse_args(&[], true)?;
     for arg in parsed_args.values.iter() {
         let mut new_task_id = 0;
         let mut tasks: Vec<Task> = TaskManager::get_tasks()?;
