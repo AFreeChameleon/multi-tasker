@@ -14,7 +14,7 @@ const FLAGS: [(&str, bool); 1] = [
 ];
 
 pub fn run() -> Result<(), MultErrorTuple> {
-    let parsed_args = parse_args(&FLAGS)?;
+    let parsed_args = parse_args(&FLAGS, false)?;
     let mut table = TableManager {
         ascii_table: Table::new(),
         table_data: Vec::new()
@@ -75,7 +75,7 @@ pub fn setup_table(table: &mut TableManager) -> Result<(), MultErrorTuple> {
             // Get memory stats
             let process_headers = ProcessHeaders {
                 pid: command.pid,
-                memory: process.virtual_memory(),
+                memory: process.memory(),
                 cpu: process.cpu_usage(),
                 runtime: process.run_time(),
                 status: "Running".to_string()

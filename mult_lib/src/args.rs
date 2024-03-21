@@ -1,6 +1,6 @@
 use std::env;
 
-use crate::error::MultErrorTuple;
+use crate::error::{MultError, MultErrorTuple};
 
 pub struct ParsedArgs {
     pub flags: Vec<String>,
@@ -9,7 +9,7 @@ pub struct ParsedArgs {
 }
 
 // flags is an array of the name of the flag like --watch and if the flag has a value
-pub fn parse_args(flags: &[(&str, bool)]) -> Result<ParsedArgs, MultErrorTuple> {
+pub fn parse_args(flags: &[(&str, bool)], allow_values: bool) -> Result<ParsedArgs, MultErrorTuple> {
     let mut parsed_args = ParsedArgs {
         flags: Vec::new(),
         value_flags: Vec::new(),
@@ -31,6 +31,9 @@ pub fn parse_args(flags: &[(&str, bool)]) -> Result<ParsedArgs, MultErrorTuple> 
                 }
                 parsed_args.flags.push(arg);
                 continue;
+            }
+            if !allow_values {
+                return Err((MultError::InvalidArgument, Some(arg)));
             }
             parsed_args.values.push(arg);
             continue;

@@ -22,6 +22,7 @@ pub enum MultError {
     InvalidArgument,
     CannotReadOutputFile,
     OSNotSupported,
+    CustomError,
     // Linux only
     ForkFailed,
     SetSidFailed
@@ -50,6 +51,7 @@ pub fn print_error(error: MultError, descriptor: Option<String>) {
         MultError::ForkFailed => "Fork failed.".to_string(),
         MultError::SetSidFailed => "Setting sid failed.".to_string(),
         MultError::OSNotSupported => "Windows & linux is only officially supported at the moment".to_string(),
+        MultError::CustomError => format!("{}", descriptor.unwrap()),
     };
     println!("{} {}", "Error:".red(), message);
 }

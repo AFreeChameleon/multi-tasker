@@ -7,7 +7,7 @@ use mult_lib::task::TaskManager;
 use crate::stop::kill_process;
 
 pub fn run() -> Result<(), MultErrorTuple> {
-    let parsed_args = parse_args(&[])?;
+    let parsed_args = parse_args(&[], true)?;
     let tasks = TaskManager::get_tasks()?;
     let mut new_tasks = tasks.clone();
     for arg in parsed_args.values.iter() {

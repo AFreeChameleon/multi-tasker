@@ -8,7 +8,7 @@ use crate::stop::kill_process;
 use crate::start::start_process;
 
 pub fn run() -> Result<(), MultErrorTuple> {
-    let parsed_args = parse_args(&[])?;
+    let parsed_args = parse_args(&[], true)?;
     let tasks = TaskManager::get_tasks()?;
     for arg in parsed_args.values.iter() {
         let task_id: u32 = TaskManager::parse_arg(Some(arg.to_string()))?;

@@ -1,14 +1,27 @@
 use std::fs;
 use std::path::Path;
 
+use home::home_dir;
+use mult_lib::args::parse_args;
 use mult_lib::error::{print_error, print_success, MultError, MultErrorTuple};
 use mult_lib::task::TaskManager;
+
+const FIX_FLAG: &str = "--fix";
+const FLAGS: [(&str, bool); 1] = [
+    (FIX_FLAG, false)
+];
 
 pub fn run() -> Result<(), MultErrorTuple> {
     #[cfg(target_family = "windows")]
     colored::control::set_virtual_terminal(true).unwrap();
+    let parsed_args = parse_args(&FLAGS, false)?;
+    let mut fix_enabled = false;
+    if parsed_args.flags.contains(&FIX_FLAG.to_string()) {
+        println!("Fix flag enabled.");
+        fix_enabled = true;
+    }
     println!("Running health check...");
-    match run_tests() {
+    match run_tests(fix_enabled) {
         Ok(()) => println!("No failures detected."),
         Err(Some((err, descriptor))) => print_error(err, descriptor),
         Err(_) => ()
@@ -17,36 +30,56 @@ pub fn run() -> Result<(), MultErrorTuple> {
     Ok(())
 }
 
-fn run_tests() -> Result<(), Option<MultErrorTuple>> {
+fn run_tests(fix_enabled: bool) -> Result<(), Option<MultErrorTuple>> {
     // Initial checks
     let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
     let tasks_dir = Path::new(&tasks_dir_str);
     if !tasks_dir.exists() && tasks_dir.is_dir() {
-        return Err(Some((MultError::MainDirNotExist, None)))
+        if !fix_enabled {
+            return Err(Some((MultError::MainDirNotExist, None)))
+        }
+        create_main_dir()?;
     }
     print_success("Main directory exists.");
     // Check tasks file exists
     let processes_dir = tasks_dir.join("processes");
     let mut processes = match check_processes_dir(&processes_dir) {
-        Ok(val) => val,
-        Err(msg) => return Err(Some(msg))
+        Ok(val) => {
+            print_success("Processes directory exists.");
+            val
+        },
+        Err(msg) => {
+            if !fix_enabled {
+                return Err(Some(msg));
+            }
+            create_process_dir()?;
+            Vec::new()
+        }
     };
-    print_success("Processes directory exists.");
     // Checking for processes while no task file exists
     if !tasks_dir.join("tasks.bin").exists() {
-        for name in processes {
+        for name in &processes {
             print_error(MultError::UnknownProcessInDir, Some(name.to_string()));
         }
-        return Err(None)
+        if !fix_enabled {
+            return Err(None)
+        }
+    } else {
+        print_success("Tasks file exists.");
     }
-    print_success("Tasks file exists.");
+    
     let tasks = match TaskManager::get_tasks() {
-        Ok(val) => val,
+        Ok(val) => {
+            print_success("Tasks file read.");
+            val
+        },
         Err(msg) => {
-            return Err(Some(msg));
+            if !fix_enabled {
+                return Err(Some(msg));
+            }
+            Vec::new()
         }
     };
-    print_success("Tasks file read.");
     // Check process dir, log files & data binary
     for task in tasks.iter() {
         if processes.contains(&task.id.to_string()) {
@@ -61,8 +94,11 @@ fn run_tests() -> Result<(), Option<MultErrorTuple>> {
         };
     }
     print_success("Task logs read.");
-    for process in processes {
-        print_error(MultError::UnknownProcessInDir, Some(process));
+    for process in &processes {
+        print_error(MultError::UnknownProcessInDir, Some(process.to_string()));
+        if !fix_enabled {
+            delete_process(process.to_string())?;
+        }
     }
     Ok(())
 }
@@ -91,3 +127,36 @@ fn check_processes_dir(processes_dir: &Path) -> Result<Vec<String>, MultErrorTup
     Ok(name_entries)
 }
 
+fn create_main_dir() -> Result<(), MultErrorTuple> {
+    let home_dir_string = home_dir().unwrap();
+    let home = Path::new(&home_dir_string);
+    let main_dir = home.join(".multi-tasker/");
+    fs::create_dir(main_dir).unwrap();
+    print_success("Created main dir.");
+    Ok(())
+}
+
+fn create_process_dir() -> Result<(), MultErrorTuple> {
+    let home_dir_string = home_dir().unwrap();
+    let home = Path::new(&home_dir_string);
+    let processes_dir = home.join(".multi-tasker/processes/");
+    fs::create_dir(processes_dir).unwrap();
+    print_success("Created processes dir.");
+    Ok(())
+}
+
+fn delete_process(process: String) -> Result<(), MultErrorTuple> {
+    let home_dir_string = home_dir().unwrap();
+    let home = Path::new(&home_dir_string);
+    let process_dir = home.join(format!(".multi-tasker/processes/{}", process));
+    if process_dir.is_dir() {
+        fs::remove_dir_all(&process_dir).unwrap();
+    } else if process_dir.is_file() {
+        fs::remove_file(&process_dir).unwrap();
+    }
+    print_success(format!(
+        "Deleted unknown process: {}",
+        &process_dir.display().to_string()).as_str()
+    );
+    Ok(())
+}
