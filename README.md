@@ -8,7 +8,7 @@ A daemoniser for linux, mac & windows written in rust. Inspired by [pm2](https:/
 ## Getting Started
 
 ```
-> mult help
+> mlt help
 usage: mult [options] [value]
 options:
     create  Create a process and run it. [value] must be a command e.g "ping google.com"
@@ -101,5 +101,3 @@ Licensed under either of
 ### What I need to do:
 
 * Create install script
-* Add fix to health command V
-* Create config file to read
