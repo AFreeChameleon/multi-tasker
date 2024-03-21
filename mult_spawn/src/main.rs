@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
-#![cfg(target_family = "windows")]
 
+#[cfg(target_family = "windows")]
 use std::{
     thread,
     env,
@@ -11,11 +11,14 @@ use std::{
     process::{Command, Stdio},
     time::{SystemTime, UNIX_EPOCH}
 };
+#[cfg(target_family = "windows")]
 use home::home_dir;
 
+#[cfg(target_family = "windows")]
 use mult_lib::command::{CommandManager, CommandData};
 
 // Usage: mult_spawn process_dir command
+#[cfg(target_family = "windows")]
 fn main() -> Result<(), String> {
     let dir_string = env::args().nth(1).unwrap();
     let process_dir = Path::new(&dir_string);
@@ -84,5 +87,11 @@ fn main() -> Result<(), String> {
         }
     });
     child.wait().unwrap();
+    Ok(())
+}
+
+#[cfg(target_family = "unix")]
+fn main() -> Result<(), String> {
+    println!("Cannot run on unix");
     Ok(())
 }
