@@ -1,3 +1,5 @@
+use std::env;
+
 use mult_lib::args::parse_args;
 use mult_lib::error::{print_success, MultError, MultErrorTuple};
 use sysinfo::{Pid, System};
@@ -6,7 +8,8 @@ use mult_lib::task::TaskManager;
 use mult_lib::command::CommandManager;
 
 pub fn run() -> Result<(), MultErrorTuple> {
-    let parsed_args = parse_args(&[], true)?;
+    let args = env::args();
+    let parsed_args = parse_args(&args.collect::<Vec<String>>()[1..], &[], true)?;
     let tasks = TaskManager::get_tasks()?;
     for arg in parsed_args.values.iter() {
         let task_id: u32 = TaskManager::parse_arg(Some(arg.to_string()))?;

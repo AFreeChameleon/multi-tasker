@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::Path;
+use std::env;
 
 use home::home_dir;
 use mult_lib::args::parse_args;
@@ -12,9 +13,10 @@ const FLAGS: [(&str, bool); 1] = [
 ];
 
 pub fn run() -> Result<(), MultErrorTuple> {
+    let args = env::args();
     #[cfg(target_family = "windows")]
     colored::control::set_virtual_terminal(true).unwrap();
-    let parsed_args = parse_args(&FLAGS, false)?;
+    let parsed_args = parse_args(&args.collect::<Vec<String>>()[1..], &FLAGS, false)?;
     let mut fix_enabled = false;
     if parsed_args.flags.contains(&FIX_FLAG.to_string()) {
         println!("Fix flag enabled.");

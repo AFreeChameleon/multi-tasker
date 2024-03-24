@@ -7,6 +7,7 @@ use home::home_dir;
 use mult_lib::error::{MultError, MultErrorTuple};
 use mult_lib::task::Files;
 use mult_lib::command::{CommandManager, CommandData};
+use sysinfo::{System, Pid};
 
 pub fn run_daemon(files: Files, command: String) -> Result<(), MultErrorTuple> {
     let process_id;
@@ -36,11 +37,11 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), MultErrorTuple> {
         libc::close(libc::STDERR_FILENO);
     }
     // Do daemon stuff here
-    run_command(&command, &files.process_dir);
+    run_command(&command, &files.process_dir)?;
     Ok(())
 }
 
-fn run_command(command: &str, process_dir: &Path) {
+fn run_command(command: &str, process_dir: &Path) -> Result<(), MultErrorTuple> {
     let mut child = Command::new("sh")
         .args(&["-c", &command])
         .stdout(Stdio::piped())
@@ -53,10 +54,18 @@ fn run_command(command: &str, process_dir: &Path) {
         Err(_) => home_dir().unwrap()
     };
 
+    let sys = System::new_all();
+
+    let process = sys.process(Pid::from_u32(child.id()));
+    if let None = process {
+        return Err((MultError::ProcessNotExists, None));
+    }
+    let process_name = process.unwrap().name();
     let data = CommandData {
         command: command.to_string(),
         pid: child.id(),
-        dir: current_dir.display().to_string()
+        dir: current_dir.display().to_string(),
+        name: process_name.to_string()
     };
     CommandManager::write_command_data(data, process_dir);
 
@@ -104,4 +113,5 @@ fn run_command(command: &str, process_dir: &Path) {
         }
     });
     child.wait().unwrap();
+    Ok(())
 }

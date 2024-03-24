@@ -1,4 +1,4 @@
-use std::{thread, time::Duration};
+use std::{thread, time::Duration, env};
 use mult_lib::args::parse_args;
 use prettytable::Table;
 use sysinfo::{System, Pid};
@@ -14,7 +14,8 @@ const FLAGS: [(&str, bool); 1] = [
 ];
 
 pub fn run() -> Result<(), MultErrorTuple> {
-    let parsed_args = parse_args(&FLAGS, false)?;
+    let args = env::args();
+    let parsed_args = parse_args(&args.collect::<Vec<String>>()[2..], &FLAGS, false)?;
     let mut table = TableManager {
         ascii_table: Table::new(),
         table_data: Vec::new()
@@ -72,6 +73,7 @@ pub fn setup_table(table: &mut TableManager) -> Result<(), MultErrorTuple> {
             command: command.command,
         };
         if let Some(process) = sys.process(Pid::from_u32(command.pid)) {
+            println!("{}", process.name());
             // Get memory stats
             let process_headers = ProcessHeaders {
                 pid: command.pid,

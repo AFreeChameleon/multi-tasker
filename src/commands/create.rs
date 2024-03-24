@@ -1,3 +1,5 @@
+use std::env;
+
 use mult_lib::args::parse_args;
 use mult_lib::task::{Task, TaskManager};
 use mult_lib::error::{print_success, MultErrorTuple};
@@ -8,7 +10,8 @@ use crate::platform_lib::linux::fork;
 use crate::platform_lib::windows::fork;
 
 pub fn run() -> Result<(), MultErrorTuple> {
-    let parsed_args = parse_args(&[], true)?;
+    let args = env::args();
+    let parsed_args = parse_args(&args.collect::<Vec<String>>()[1..], &[], true)?;
     for arg in parsed_args.values.iter() {
         let mut new_task_id = 0;
         let mut tasks: Vec<Task> = TaskManager::get_tasks()?;

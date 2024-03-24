@@ -2,9 +2,11 @@ use colored::Colorize;
 
 pub type MultErrorTuple = (MultError, Option<String>);
 
+#[derive(Debug)]
 pub enum MultError {
     MainDirNotExist,
     ProcessNotRunning,
+    ProcessNotExists,
     ProcessAlreadyRunning,
     ProcessDirNotExist,
     UnknownProcessInDir,
@@ -32,6 +34,7 @@ pub fn print_error(error: MultError, descriptor: Option<String>) {
     let message = match error {
         MultError::MainDirNotExist => "Main directory doesn't exist.".to_string(),
         MultError::ProcessDirNotExist => "Process directory doesn't exist.".to_string(),
+        MultError::ProcessNotExists => "Process doesn't exist.".to_string(),
         MultError::FailedReadingProcessDir => "Failed reading processes directory.".to_string(),
         MultError::TaskDirNotExist => format!("Could not get task directory {}.", descriptor.unwrap()),
         MultError::TaskFileNotExist => format!("Could not get task file {}.", descriptor.unwrap()),

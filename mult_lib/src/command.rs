@@ -11,7 +11,8 @@ use crate::error::{MultError, MultErrorTuple};
 pub struct CommandData {
     pub command: String,
     pub pid: u32,
-    pub dir: String
+    pub dir: String,
+    pub name: String
 }
 
 pub struct CommandManager {}
@@ -28,7 +29,10 @@ impl CommandManager {
         Err((MultError::TaskNotFound, None))
     }
 
-    pub fn write_command_data(command: CommandData, process_dir: &Path) {
+    pub fn write_command_data(
+        command: CommandData,
+        process_dir: &Path
+    ) {
         let encoded_data: Vec<u8> = bincode::serialize::<CommandData>(&command).unwrap();
         let mut process_file = File::create(process_dir.join("data.bin")).unwrap();
         process_file.write_all(&encoded_data).unwrap();

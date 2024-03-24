@@ -1,4 +1,4 @@
-use std::fs;
+use std::{env, fs};
 
 use mult_lib::args::parse_args;
 use mult_lib::command::CommandManager;
@@ -7,7 +7,8 @@ use mult_lib::task::TaskManager;
 use crate::stop::kill_process;
 
 pub fn run() -> Result<(), MultErrorTuple> {
-    let parsed_args = parse_args(&[], true)?;
+    let args = env::args();
+    let parsed_args = parse_args(&args.collect::<Vec<String>>()[1..], &[], true)?;
     let tasks = TaskManager::get_tasks()?;
     let mut new_tasks = tasks.clone();
     for arg in parsed_args.values.iter() {
