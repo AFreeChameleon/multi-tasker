@@ -318,6 +318,7 @@ version = "0.1.0"
 dependencies = [
  "home",
  "mult_lib",
+ "sysinfo",
 ]
 
 [[package]]

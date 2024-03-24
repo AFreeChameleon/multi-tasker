@@ -32,7 +32,7 @@ pub enum MultError {
 
 pub fn print_error(error: MultError, descriptor: Option<String>) {
     let message = match error {
-        MultError::MainDirNotExist => "Main directory doesn't exist.".to_string(),
+        MultError::MainDirNotExist => "Main directory doesn't exist.\nTry running `mlt health --fix` to fix this.".to_string(),
         MultError::ProcessDirNotExist => "Process directory doesn't exist.".to_string(),
         MultError::ProcessNotExists => "Process doesn't exist.".to_string(),
         MultError::FailedReadingProcessDir => "Failed reading processes directory.".to_string(),
