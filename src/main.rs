@@ -6,7 +6,7 @@ mod commands;
 mod platform_lib;
 
 const NO_MODE_TEXT: &str = "No mode given.\n
-For a full list of commands: mult help";
+For a full list of commands: mlt help";
 fn main() {
     #[cfg(target_family = "windows")]
     colored::control::set_virtual_terminal(true).unwrap();
