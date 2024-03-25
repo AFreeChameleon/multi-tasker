@@ -112,6 +112,6 @@ fn run_command(command: &str, process_dir: &Path) -> Result<(), MultErrorTuple> 
                 .expect("Problem writing to stderr.");
         }
     });
-    let output = child.wait_with_output().unwrap();
+    child.wait().unwrap();
     Ok(())
 }
