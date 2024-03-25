@@ -1,6 +1,6 @@
 #![cfg(target_family = "unix")]
 use std::{
-    borrow::BorrowMut, env, fs::File, io::{BufRead, BufReader, Write}, path::Path, process::{Command, Stdio}, ptr, thread, time::{SystemTime, UNIX_EPOCH}
+    env, fs::File, io::{BufRead, BufReader, Write}, path::Path, process::{Command, Stdio}, thread, time::{SystemTime, UNIX_EPOCH}
 };
 use home::home_dir;
 
@@ -12,9 +12,8 @@ use sysinfo::{System, Pid};
 pub fn run_daemon(files: Files, command: String) -> Result<(), MultErrorTuple> {
     let process_id;
     let sid;
-    let mut master: i32 = 0;
     unsafe {
-        process_id = libc::forkpty(&mut master, ptr::null_mut(), ptr::null(), ptr::null());
+        process_id = libc::fork();
     }
     // Fork failed
     if process_id < 0 {
@@ -22,7 +21,7 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), MultErrorTuple> {
     }
     // Parent process - need to kill it
     if process_id > 0 {
-        print_info(&format!("Process id of child process {} {}", process_id, master));
+        print_info(&format!("Process id of child process {}", process_id));
         return Ok(())
     }
     unsafe {
@@ -42,16 +41,9 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), MultErrorTuple> {
     Ok(())
 }
 
-fn set_terminal_colors() {
-    let term = env::var_os("TERM");
-    let term_program = env::var_os("TERM_PROGRAM");
-    let colorterm = env::var_os("COLORTERM");
-}
-
 fn run_command(command: &str, process_dir: &Path) -> Result<(), MultErrorTuple> {
     let mut child = Command::new("sh")
         .args(&["-c", &command])
-        .env("COLORTERM", "truecolor")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
