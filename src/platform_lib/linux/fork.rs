@@ -104,7 +104,7 @@ fn run_command(command: &str, process_dir: &Path) -> Result<(), MultErrorTuple> 
                 .unwrap()
                 .as_millis();
             let formatted_line = format!(
-                "{:}|{}",
+                "{:}|{}\n",
                 now,
                 line.expect("Problem reading stderr.")
             ); 
@@ -112,6 +112,7 @@ fn run_command(command: &str, process_dir: &Path) -> Result<(), MultErrorTuple> 
                 .expect("Problem writing to stderr.");
         }
     });
-    child.wait().unwrap();
+    let output = child.wait_with_output().unwrap();
+    File::create(format!("/home/bean/dev/test/node-server/STATUS{}", output.status.code().unwrap().to_string())).unwrap();
     Ok(())
 }
