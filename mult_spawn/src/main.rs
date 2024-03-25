@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
-#![cfg(target_family = "windows")]
 
+#[cfg(target_family = "windows")]
 use std::{
     thread,
     env,
@@ -12,9 +12,13 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
     process
 };
+#[cfg(target_family = "windows")]
 use home::home_dir;
+#[cfg(target_family = "windows")]
 use sysinfo::{Pid, System};
+#[cfg(target_family = "windows")]
 use mult_lib::command::{CommandManager, CommandData};
+#[cfg(target_family = "windows")]
 use mult_lib::error::{MultError, MultErrorTuple};
 
 // Usage: mult_spawn process_dir command
