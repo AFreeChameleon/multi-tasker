@@ -78,14 +78,14 @@ mod tests {
             "--test-flag".to_string(),
             "--test-value-flag".to_string(),
             "test-value-flag-value".to_string(),
-            "value".to_string()
+            "value with space".to_string()
         ], &flags, true).unwrap();
         assert_eq!(
             sorted_args.value_flags,
             vec![("--test-value-flag".to_string(), Some("test-value-flag-value".to_string()))]
         );
         assert_eq!(sorted_args.flags, vec!["--test-flag"]);
-        assert_eq!(sorted_args.values, vec!["value"]);
+        assert_eq!(sorted_args.values, vec!["value with space"]);
     }
 }
 

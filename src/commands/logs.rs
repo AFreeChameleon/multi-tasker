@@ -26,15 +26,14 @@ pub fn run() -> Result<(), MultErrorTuple> {
 
     let tasks = TaskManager::get_tasks()?;
     let task_id: u32 = TaskManager::parse_arg(env::args().nth(2))?;
-    let task = TaskManager::get_task(&tasks, task_id)?;
+    let _ = TaskManager::get_task(&tasks, task_id)?;
 
-    let file_path = format!(
-        "{}/.multi-tasker/processes/{}",
-        home::home_dir().unwrap().display(),
-        &task.id 
-    );
-    let out_file_path = format!("{}/stdout.out", &file_path);
-    let err_file_path = format!("{}/stderr.err", &file_path);
+    let file_path = Path::new(&home::home_dir().unwrap())
+        .join(".multi-tasker")
+        .join("processes")
+        .join(task_id.to_string());
+    let out_file_path = file_path.join("stdout.out");
+    let err_file_path = file_path.join("stderr.err");
 
     let mut out_file = File::open(&out_file_path).unwrap();
     let mut out_pos = fs::metadata(&out_file_path).unwrap().len();

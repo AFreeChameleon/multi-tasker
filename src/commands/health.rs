@@ -31,8 +31,8 @@ pub fn run() -> Result<(), MultErrorTuple> {
 
 fn run_tests(fix_enabled: bool) -> Result<(), Option<MultErrorTuple>> {
     // Initial checks
-    let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
-    let tasks_dir = Path::new(&tasks_dir_str);
+    let tasks_dir = Path::new(&home::home_dir().unwrap())
+        .join(".multi-tasker");
     if !tasks_dir.exists() && !tasks_dir.is_dir() {
         if !fix_enabled {
             return Err(Some((MultError::MainDirNotExist, None)))

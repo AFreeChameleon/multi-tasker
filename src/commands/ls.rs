@@ -73,7 +73,10 @@ pub fn setup_table(table: &mut TableManager) -> Result<(), MultErrorTuple> {
             command: command.command,
         };
         if let Some(process) = sys.process(Pid::from_u32(command.pid)) {
-            println!("{}", process.name());
+            if process.name() != command.name {
+                table.insert_row(main_headers, None);
+                continue;
+            }
             // Get memory stats
             let process_headers = ProcessHeaders {
                 pid: command.pid,

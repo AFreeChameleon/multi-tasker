@@ -9,7 +9,7 @@ use mult_lib::command::CommandManager;
 
 pub fn run() -> Result<(), MultErrorTuple> {
     let args = env::args();
-    let parsed_args = parse_args(&args.collect::<Vec<String>>()[1..], &[], true)?;
+    let parsed_args = parse_args(&args.collect::<Vec<String>>()[2..], &[], true)?;
     let tasks = TaskManager::get_tasks()?;
     for arg in parsed_args.values.iter() {
         let task_id: u32 = TaskManager::parse_arg(Some(arg.to_string()))?;

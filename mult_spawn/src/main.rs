@@ -9,7 +9,8 @@ use std::{
     os::windows::process::CommandExt,
     path::Path,
     process::{Command, Stdio},
-    time::{SystemTime, UNIX_EPOCH}
+    time::{SystemTime, UNIX_EPOCH},
+    process
 };
 use home::home_dir;
 use sysinfo::{Pid, System};
@@ -37,14 +38,14 @@ fn main() -> Result<(), MultErrorTuple> {
 
     let sys = System::new_all();
 
-    let process = sys.process(Pid::from_u32(child.id()));
-    if let None = process {
+    let process = sys.process(Pid::from_u32(process::id()));
+    if process.is_none() {
         return Err((MultError::ProcessNotExists, None));
     }
     let process_name = process.unwrap().name();
     let data = CommandData {
         command,
-        pid: child.id(),
+        pid: process::id(),
         dir: current_dir.display().to_string(),
         name: process_name.to_string()
     };

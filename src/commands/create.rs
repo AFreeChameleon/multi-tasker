@@ -11,7 +11,7 @@ use crate::platform_lib::windows::fork;
 
 pub fn run() -> Result<(), MultErrorTuple> {
     let args = env::args();
-    let parsed_args = parse_args(&args.collect::<Vec<String>>()[1..], &[], true)?;
+    let parsed_args = parse_args(&args.collect::<Vec<String>>()[2..], &[], true)?;
     for arg in parsed_args.values.iter() {
         let mut new_task_id = 0;
         let mut tasks: Vec<Task> = TaskManager::get_tasks()?;
