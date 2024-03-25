@@ -1,6 +1,6 @@
 use mult_lib::error::MultErrorTuple;
 
-const HELP_TEXT: &str = "usage: mult [options] [value]
+const HELP_TEXT: &str = "usage: mlt [options] [value]
 options:
     create  Create a process and run it. [value] must be a command e.g \"ping google.com\"
 
@@ -24,6 +24,8 @@ options:
     help    Shows available options.
 
     health  Checks state of mult, run this when mult is not working.
+
+            --fix           Tries to fix any errors `mlt health` throws.
 ";
 
 pub fn run() -> Result<(), MultErrorTuple> {
