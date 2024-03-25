@@ -113,6 +113,5 @@ fn run_command(command: &str, process_dir: &Path) -> Result<(), MultErrorTuple> 
         }
     });
     let output = child.wait_with_output().unwrap();
-    File::create(format!("/home/bean/dev/test/node-server/STATUS{}", output.status.code().unwrap().to_string())).unwrap();
     Ok(())
 }
