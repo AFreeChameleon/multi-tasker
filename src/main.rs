@@ -5,7 +5,7 @@ use mult_lib::error::{print_error, MultError};
 mod commands;
 mod platform_lib;
 
-const NO_MODE_TEXT: &str = "No mode given, usage: mult [start|stop|ls] [command|task id]\n
+const NO_MODE_TEXT: &str = "No mode given.\n
 For a full list of commands: mult help";
 fn main() {
     #[cfg(target_family = "windows")]
