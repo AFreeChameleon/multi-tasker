@@ -90,6 +90,12 @@ To see what's wrong with it. This is mainly for debugging purposes.
 
 ---
 
+# Issues
+
+Any command run will not include colors so in the command or your environment, force the formatting e.g using FORCE_COLOR=1 in nodejs
+
+---
+
 Licensed under either of
 
 * Apache License, Version 2.0 (LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0)
