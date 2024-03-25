@@ -2,7 +2,7 @@ use std::env;
 
 use mult_lib::args::parse_args;
 use mult_lib::task::{Task, TaskManager};
-use mult_lib::error::{print_success, MultErrorTuple};
+use mult_lib::error::{print_info, print_success, MultErrorTuple};
 
 #[cfg(target_family = "unix")]
 use crate::platform_lib::linux::fork;
@@ -19,7 +19,7 @@ pub fn run() -> Result<(), MultErrorTuple> {
             new_task_id = last_task.id + 1;
         }
         tasks.push(Task { id: new_task_id });
-        println!("Running command...");
+        print_info("Running command...");
         let files = TaskManager::generate_task_files(new_task_id, &tasks);
 
         #[cfg(target_family = "unix")]

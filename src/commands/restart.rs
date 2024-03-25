@@ -1,6 +1,6 @@
 use std::env;
 
-use mult_lib::error::{print_success, MultErrorTuple};
+use mult_lib::error::{print_info, print_success, MultErrorTuple};
 use mult_lib::task::TaskManager;
 use mult_lib::command::CommandManager;
 use mult_lib::args::parse_args;
@@ -16,10 +16,10 @@ pub fn run() -> Result<(), MultErrorTuple> {
         let task_id: u32 = TaskManager::parse_arg(Some(arg.to_string()))?;
         let task = TaskManager::get_task(&tasks, task_id)?;
         let command_data = CommandManager::read_command_data(task.id)?;
-        println!("Killing process...");
+        print_info("Killing process...");
         kill_process(command_data.pid)?;
         let files = TaskManager::generate_task_files(task.id, &tasks);
-        println!("Restarting process...");
+        print_info("Restarting process...");
         start_process(files, command_data)?;
         print_success(&format!("Process {} restarted.", task_id));
     }
