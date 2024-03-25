@@ -2,7 +2,7 @@ use std::{env, fs, path::Path};
 
 use mult_lib::args::parse_args;
 use mult_lib::command::CommandManager;
-use mult_lib::error::{print_success, MultError, MultErrorTuple};
+use mult_lib::error::{print_info, print_success, MultError, MultErrorTuple};
 use mult_lib::task::TaskManager;
 use crate::stop::kill_process;
 
@@ -17,7 +17,7 @@ pub fn run() -> Result<(), MultErrorTuple> {
         let command_data = CommandManager::read_command_data(task.id)?;
         match kill_process(command_data.pid) {
             Ok(_) => (),
-            Err(_) => { println!("Process {} is not running.", task_id) }
+            Err(_) => { print_info(&format!("Process {} is not running.", task_id)) }
         };
         new_tasks = new_tasks.into_iter().filter(|t| t.id != task_id).collect();
         let process_dir = Path::new(&home::home_dir().unwrap())

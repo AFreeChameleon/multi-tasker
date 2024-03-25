@@ -4,7 +4,7 @@ use std::env;
 
 use home::home_dir;
 use mult_lib::args::parse_args;
-use mult_lib::error::{print_error, print_success, MultError, MultErrorTuple};
+use mult_lib::error::{print_error, print_info, print_success, MultError, MultErrorTuple};
 use mult_lib::task::TaskManager;
 
 const FIX_FLAG: &str = "--fix";
@@ -17,12 +17,12 @@ pub fn run() -> Result<(), MultErrorTuple> {
     let parsed_args = parse_args(&args.collect::<Vec<String>>()[2..], &FLAGS, false)?;
     let mut fix_enabled = false;
     if parsed_args.flags.contains(&FIX_FLAG.to_string()) {
-        println!("Fix flag enabled.");
+        print_info("Fix flag enabled.");
         fix_enabled = true;
     }
-    println!("Running health check...");
+    print_info("Running health check...");
     match run_tests(fix_enabled) {
-        Ok(()) => println!("No failures detected."),
+        Ok(()) => print_success("No failures detected."),
         Err(Some((err, descriptor))) => print_error(err, descriptor),
         Err(_) => ()
     };

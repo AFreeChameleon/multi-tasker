@@ -62,3 +62,7 @@ pub fn print_error(error: MultError, descriptor: Option<String>) {
 pub fn print_success(text: &str) {
     println!("{} {text}", "Success".green());
 }
+
+pub fn print_info(text: &str) {
+    println!("{} {text}", "Info".blue());
+}

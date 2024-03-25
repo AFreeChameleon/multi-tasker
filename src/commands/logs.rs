@@ -8,7 +8,7 @@ use std::{
     collections::VecDeque
 };
 
-use mult_lib::{args::{parse_args, ParsedArgs}, error::{MultError, MultErrorTuple}, task::TaskManager};
+use mult_lib::{args::{parse_args, ParsedArgs}, error::{print_error, print_info, MultError, MultErrorTuple}, task::TaskManager};
 
 const LINES_FLAG: &str = "--lines";
 const WATCH_FLAG: &str = "--watch";
@@ -47,7 +47,10 @@ pub fn run() -> Result<(), MultErrorTuple> {
     );
     // Sorting lines by time
     let sorted_lines = sort_last_lines(combined_lines)?;
-    println!("Printing the last {} lines of logs.", sorted_lines.len());
+    print_info(&format!(
+        "Printing the last {} lines of logs.",
+        sorted_lines.len()).to_string()
+    );
     last_lines_to_print = sorted_lines.len();
     for i in 0..last_lines_to_print {
         print!("{}", sorted_lines[i].content);
@@ -78,7 +81,7 @@ pub fn run() -> Result<(), MultErrorTuple> {
                     }
                 }
             }
-            Err(error) => println!("File watch error {error:?}")
+            Err(error) => print_error(MultError::CustomError, Some(format!("File watch error {error:?}")))
         }
     }).unwrap();
 
@@ -90,11 +93,11 @@ pub fn run() -> Result<(), MultErrorTuple> {
                 let (_, content) = line.split_once("|").expect("Logs missing time.");
                 println!("{content}")
             },
-            Err(error) => println!("Reciever error {error:?}")
+            Err(error) => print_error(MultError::CustomError, Some(format!("Reciever error {error:?}")))
         }
     }
 
-    println!("Logs stopped.");
+    print_info("Logs stopped.");
     Ok(())
 }
 

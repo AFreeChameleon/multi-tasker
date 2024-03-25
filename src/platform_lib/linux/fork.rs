@@ -4,7 +4,7 @@ use std::{
 };
 use home::home_dir;
 
-use mult_lib::error::{MultError, MultErrorTuple};
+use mult_lib::error::{print_info, MultError, MultErrorTuple};
 use mult_lib::task::Files;
 use mult_lib::command::{CommandManager, CommandData};
 use sysinfo::{System, Pid};
@@ -21,7 +21,7 @@ pub fn run_daemon(files: Files, command: String) -> Result<(), MultErrorTuple> {
     }
     // Parent process - need to kill it
     if process_id > 0 {
-        println!("Process id of child process {}", process_id);
+        print_info(&format!("Process id of child process {}", process_id));
         return Ok(())
     }
     unsafe {

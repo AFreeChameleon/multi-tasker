@@ -26,7 +26,7 @@ fn main() {
             print_error(message, descriptor);
         }
     } else {
-        println!("{NO_MODE_TEXT}");
+        print_error(MultError::CustomError, Some(NO_MODE_TEXT.to_string()));
     }
 }
 
