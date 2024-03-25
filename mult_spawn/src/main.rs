@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
+#![cfg(target_family = "windows")]
 
-#[cfg(target_family = "windows")]
 use std::{
     thread,
     env,
@@ -9,17 +9,17 @@ use std::{
     os::windows::process::CommandExt,
     path::Path,
     process::{Command, Stdio},
-    time::{SystemTime, UNIX_EPOCH}
+    time::{SystemTime, UNIX_EPOCH},
+    process
 };
-#[cfg(target_family = "windows")]
 use home::home_dir;
-
-#[cfg(target_family = "windows")]
+use sysinfo::{Pid, System};
 use mult_lib::command::{CommandManager, CommandData};
+use mult_lib::error::{MultError, MultErrorTuple};
 
 // Usage: mult_spawn process_dir command
 #[cfg(target_family = "windows")]
-fn main() -> Result<(), String> {
+fn main() -> Result<(), MultErrorTuple> {
     let dir_string = env::args().nth(1).unwrap();
     let process_dir = Path::new(&dir_string);
     let command = env::args().nth(2).unwrap();
@@ -36,10 +36,18 @@ fn main() -> Result<(), String> {
         Err(_) => home_dir().unwrap()
     };
 
+    let sys = System::new_all();
+
+    let process = sys.process(Pid::from_u32(process::id()));
+    if process.is_none() {
+        return Err((MultError::ProcessNotExists, None));
+    }
+    let process_name = process.unwrap().name();
     let data = CommandData {
         command,
-        pid: child.id(),
-        dir: current_dir.display().to_string()
+        pid: process::id(),
+        dir: current_dir.display().to_string(),
+        name: process_name.to_string()
     };
     CommandManager::write_command_data(data, process_dir);
 

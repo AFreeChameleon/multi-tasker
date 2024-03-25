@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::Path;
+use std::env;
 
 use home::home_dir;
 use mult_lib::args::parse_args;
@@ -12,9 +13,8 @@ const FLAGS: [(&str, bool); 1] = [
 ];
 
 pub fn run() -> Result<(), MultErrorTuple> {
-    #[cfg(target_family = "windows")]
-    colored::control::set_virtual_terminal(true).unwrap();
-    let parsed_args = parse_args(&FLAGS, false)?;
+    let args = env::args();
+    let parsed_args = parse_args(&args.collect::<Vec<String>>()[2..], &FLAGS, false)?;
     let mut fix_enabled = false;
     if parsed_args.flags.contains(&FIX_FLAG.to_string()) {
         println!("Fix flag enabled.");
@@ -26,21 +26,21 @@ pub fn run() -> Result<(), MultErrorTuple> {
         Err(Some((err, descriptor))) => print_error(err, descriptor),
         Err(_) => ()
     };
-    println!("Health check finished.");
     Ok(())
 }
 
 fn run_tests(fix_enabled: bool) -> Result<(), Option<MultErrorTuple>> {
     // Initial checks
-    let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
-    let tasks_dir = Path::new(&tasks_dir_str);
-    if !tasks_dir.exists() && tasks_dir.is_dir() {
+    let tasks_dir = Path::new(&home::home_dir().unwrap())
+        .join(".multi-tasker");
+    if !tasks_dir.exists() && !tasks_dir.is_dir() {
         if !fix_enabled {
             return Err(Some((MultError::MainDirNotExist, None)))
         }
         create_main_dir()?;
+    } else {
+        print_success("Main directory exists.");
     }
-    print_success("Main directory exists.");
     // Check tasks file exists
     let processes_dir = tasks_dir.join("processes");
     let mut processes = match check_processes_dir(&processes_dir) {

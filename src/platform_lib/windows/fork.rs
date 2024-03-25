@@ -6,7 +6,7 @@ use mult_lib::{error::{MultError, MultErrorTuple}, task::Files};
 
 pub fn run_daemon(files: Files, command: String) -> Result<(), MultErrorTuple> {
     if let Ok(exe_dir) = env::current_exe() {
-        let spawn_dir = Path::new(&exe_dir);
+        let spawn_dir = Path::new(&exe_dir).parent().unwrap();
         Command::new("cmd")
             .args(&[
                   "/c",

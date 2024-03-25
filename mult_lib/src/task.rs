@@ -29,8 +29,9 @@ pub struct TaskManager {}
 
 impl TaskManager {
     pub fn test_task_files(id: u32) -> Result<(), MultErrorTuple> {
-        let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
-        let tasks_dir = Path::new(&tasks_dir_str).join(id.to_string());
+        let tasks_dir = Path::new(&home::home_dir().unwrap())
+            .join(".multi-tasker")
+            .join(id.to_string());
         if tasks_dir.exists() {
             return Err((MultError::TaskDirNotExist, Some(id.to_string())))
         }
@@ -43,8 +44,8 @@ impl TaskManager {
     }
     
     pub fn get_tasks() -> Result<Vec<Task>, MultErrorTuple> {
-        let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
-        let main_dir = Path::new(&tasks_dir_str);
+        let main_dir = Path::new(&home::home_dir().unwrap())
+            .join(".multi-tasker");
         if !main_dir.exists() {
             return Err((MultError::MainDirNotExist, None))
         }
@@ -69,8 +70,9 @@ impl TaskManager {
     }
 
     pub fn write_tasks_file(new_tasks: &Vec<Task>) {
-        let tasks_dir_str = format!("{}/.multi-tasker/", home::home_dir().unwrap().display());
-        let tasks_file_dir = Path::new(&tasks_dir_str).join("tasks.bin");
+        let tasks_file_dir = Path::new(&home::home_dir().unwrap())
+            .join(".multi-tasker")
+            .join("tasks.bin");
         let mut tasks_file = File::create(tasks_file_dir).unwrap();
         let encoded_data: Vec<u8> = bincode::serialize::<Vec<Task>>(&new_tasks).unwrap();
         tasks_file.write_all(&encoded_data).unwrap();
@@ -99,14 +101,12 @@ impl TaskManager {
     }
 
     pub fn generate_task_files(task_id: u32, tasks: &Vec<Task>) -> Files {
-        let dir_str = format!(
-            "{}/.multi-tasker/processes/{}",
-            home::home_dir().unwrap().display(),
-            &task_id 
-        );
-        let process_dir = Path::new(&dir_str);
+        let process_dir = Path::new(&home::home_dir().unwrap())
+            .join(".multi-tasker")
+            .join("processes")
+            .join(task_id.to_string());
         fs::create_dir_all(
-            process_dir
+            &process_dir
         ).unwrap();
 
         let stdout = File::create(process_dir.join("stdout.out")).unwrap();
