@@ -104,7 +104,7 @@ fn run_command(command: &str, process_dir: &Path) -> Result<(), MultErrorTuple> 
                 .unwrap()
                 .as_millis();
             let formatted_line = format!(
-                "{:}|{}",
+                "{:}|{}\n",
                 now,
                 line.expect("Problem reading stderr.")
             ); 
