@@ -1,9 +1,18 @@
-
+$env:Path + 
 # Mult
 
 A daemoniser for linux, mac & windows written in rust. Inspired by [pm2](https://github.com/Unitech/pm2).
 
 ## Installation
+
+For Linux:
+```
+```
+
+For Windows:
+```
+powershell -c "irm https://raw.githubusercontent.com/AFreeChameleon/multi-tasker/master/install.ps1|iex"
+```
 
 ## Getting Started
 
