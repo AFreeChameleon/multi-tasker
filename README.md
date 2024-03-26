@@ -1,4 +1,3 @@
-$env:Path + 
 # Mult
 
 A daemoniser for linux, mac & windows written in rust. Inspired by [pm2](https://github.com/Unitech/pm2).
