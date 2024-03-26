@@ -3,4 +3,4 @@ New-Item "$env:USERPROFILE/.multi-tasker/bin" -ItemType Directory -Force
 Expand-Archive -Force "mlt-win.zip" "$env:USERPROFILE\.multi-tasker\bin"
 [Environment]::SetEnvironmentVariable("Path", $env:Path + ";$env:USERPROFILE\.multi-tasker\bin", "User")
 $env:PATH += ";$env:USERPROFILE\.multi-tasker\bin"
-echo "Install finished, run: `mlt help` to get started"
+echo "Install finished, run: 'mlt help' to get started"
