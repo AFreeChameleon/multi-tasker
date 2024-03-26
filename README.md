@@ -7,6 +7,7 @@ A daemoniser for linux, mac & windows written in rust. Inspired by [pm2](https:/
 
 For Linux:
 ```
+curl -s "https://raw.githubusercontent.com/AFreeChameleon/multi-tasker/master/install.sh" | bash
 ```
 
 For Windows:
